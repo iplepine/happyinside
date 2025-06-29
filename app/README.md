@@ -1,16 +1,42 @@
-# app
+# Happy Inside (해피 인사이드) 🌿
 
-A new Flutter project.
+> 당신의 행복한 순간을 기록하고, 감정의 패턴을 발견하는 감성 기반 자기계발 앱
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📱 개요
 
-A few resources to get you started if this is your first Flutter project:
+**해피 인사이드(Happy Inside)**는  
+하루 중 "행복을 느낀 순간"을 간단히 기록함으로써  
+긍정적인 감정을 자각하고, 나만의 행복 패턴을 찾아가는  
+감정 기반 자기이해 앱입니다.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🎯 주요 기능 (MVP)
+
+- ✍️ **행복 기록**
+  - 텍스트 입력 (한 줄 메모)
+  - 감정 강도 선택 (1~5점)
+  - 태그 입력 or 선택
+  - 시간 자동 기록
+  - 위치(선택) 기록
+
+- 📋 **기록 목록 보기**
+  - 타임라인 또는 카드뷰 형태
+  - 날짜/태그/강도별 정렬 지원
+
+- 📊 **감정 통계 요약**
+  - 주간/월간 기록 수
+  - 자주 등장한 단어/태그
+  - 감정 강도 평균, 가장 행복했던 날 등
+
+- ⏰ **리마인더 알림**
+  - 하루 1회 알림으로 기록 유도
+  - 최근 기록이 없을 경우 gentle push
+
+---
+
+## 🧱 프로젝트 구조 (Clean Architecture + Flutter)
+    - presentation 은 MVI 아키텍쳐
+

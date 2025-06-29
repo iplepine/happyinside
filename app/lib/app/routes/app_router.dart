@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../features/calculator/presentation/pages/calculator_page.dart';
+import '../../features/home/presentation/home_page.dart';
 
 /// 앱 라우터
 class AppRouter {
   static const String initial = '/';
-  static const String calculator = '/calculator';
 
   /// 라우트 생성
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case initial:
         return MaterialPageRoute(
-          builder: (_) => const CalculatorPage(),
-        );
-      case calculator:
-        return MaterialPageRoute(
-          builder: (_) => const CalculatorPage(),
+          builder: (_) => const HomePage(),
         );
       default:
         return MaterialPageRoute(

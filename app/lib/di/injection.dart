@@ -1,8 +1,4 @@
 import 'package:get_it/get_it.dart';
-import '../core/network/api_client.dart';
-import '../features/calculator/domain/repositories/calculator_repository.dart';
-import '../features/calculator/domain/usecases/calculate_usecase.dart';
-import '../features/calculator/data/repositories/calculator_repository_impl.dart';
 
 /// 의존성 주입 설정
 class Injection {
@@ -11,25 +7,7 @@ class Injection {
   /// 의존성 초기화
   static Future<void> init() async {
     // Core
-    _getIt.registerLazySingleton<ApiClient>(
-      () => ApiClient(client: _getIt()),
-    );
-
-    // Features
-    _initCalculator();
-  }
-
-  /// Calculator Feature 의존성 초기화
-  static void _initCalculator() {
-    // Repository
-    _getIt.registerLazySingleton<CalculatorRepository>(
-      () => CalculatorRepositoryImpl(),
-    );
-
-    // Use Cases
-    _getIt.registerLazySingleton(
-      () => CalculateUseCase(_getIt()),
-    );
+    // 여기에 core 의존성만 남깁니다. 필요시 추가.
   }
 
   /// GetIt 인스턴스 반환
