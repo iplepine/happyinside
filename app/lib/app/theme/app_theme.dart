@@ -11,7 +11,6 @@ class AppTheme {
   static const _error = Color(0xFFD32F2F); // 레드
   static const _onPrimary = Color(0xFFFFFFFF); // 흰색
   static const _onSecondary = Color(0xFFFFFFFF); // 흰색
-  static const _onBackground = Color(0xFF4E342E); // 진한 브라운
   static const _onSurface = Color(0xFF4E342E); // 진한 브라운
   static const _onError = Color(0xFFFFFFFF); // 흰색
 
@@ -20,36 +19,48 @@ class AppTheme {
     primaryContainer: _primaryContainer,
     secondary: _secondary,
     secondaryContainer: _secondaryContainer,
-    background: _background,
-    surface: _surface,
+    surface: _background,
     error: _error,
     onPrimary: _onPrimary,
     onSecondary: _onSecondary,
-    onBackground: _onBackground,
     onSurface: _onSurface,
     onError: _onError,
     brightness: Brightness.light,
+  );
+
+  static final ColorScheme darkScheme = ColorScheme(
+    primary: _primary,
+    primaryContainer: _primaryContainer,
+    secondary: _secondary,
+    secondaryContainer: _secondaryContainer,
+    surface: _background,
+    error: _error,
+    onPrimary: _onPrimary,
+    onSecondary: _onSecondary,
+    onSurface: _onSurface,
+    onError: _onError,
+    brightness: Brightness.dark,
   );
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: _background,
-      appBarTheme: const AppBarTheme(
+      scaffoldBackgroundColor: colorScheme.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         centerTitle: true,
         elevation: 0,
-        backgroundColor: _surface,
-        foregroundColor: _onBackground,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _primary,
-          foregroundColor: _onPrimary,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -63,12 +74,12 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: _primary, width: 2),
         ),
-        labelStyle: const TextStyle(color: _onBackground),
+        labelStyle: const TextStyle(color: _onSurface),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: _secondary.withOpacity(0.1),
-        selectedColor: _primary.withOpacity(0.2),
-        labelStyle: const TextStyle(color: _onBackground),
+        backgroundColor: _secondary.withAlpha(10),
+        selectedColor: _primary.withAlpha(20),
+        labelStyle: const TextStyle(color: _onSurface),
         secondaryLabelStyle: const TextStyle(color: _onSecondary),
         disabledColor: Colors.grey[300],
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -81,10 +92,14 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    // 필요시 다크 테마도 유사하게 정의 가능
-    return ThemeData.dark().copyWith(
-      colorScheme: colorScheme.copyWith(brightness: Brightness.dark),
-      scaffoldBackgroundColor: Colors.grey[900],
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: darkScheme,
+      scaffoldBackgroundColor: darkScheme.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: darkScheme.surface,
+        foregroundColor: darkScheme.onSurface,
+      ),
     );
   }
 } 

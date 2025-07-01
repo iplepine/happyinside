@@ -9,25 +9,25 @@ abstract class Failure {
 
 /// 서버 관련 에러
 class ServerFailure extends Failure {
-  const ServerFailure(String message) : super(message);
+  const ServerFailure(super.message);
 }
 
 /// 네트워크 관련 에러
 class NetworkFailure extends Failure {
-  const NetworkFailure(String message) : super(message);
+  const NetworkFailure(super.message);
 }
 
 /// 캐시 관련 에러
 class CacheFailure extends Failure {
-  const CacheFailure(String message) : super(message);
+  const CacheFailure(super.message);
 }
 
 /// 인증 관련 에러
 class AuthFailure extends Failure {
-  const AuthFailure(String message) : super(message);
+  const AuthFailure(super.message);
 }
 
 /// 유효성 검사 에러
 class ValidationFailure extends Failure {
-  const ValidationFailure(String message) : super(message);
+  const ValidationFailure(super.message);
 } 

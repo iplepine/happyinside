@@ -21,16 +21,25 @@ class TagChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
       child: InputChip(
-        label: Text(tag),
+        label: Text(
+          tag,
+          style: TextStyle(
+            color: selected
+                ? colorScheme.onSurface
+                : colorScheme.onSurface.withAlpha(179),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         selected: selected,
         onSelected: onTap != null ? (_) => onTap!() : null,
         onDeleted: onDelete,
-        selectedColor: colorScheme.primary.withOpacity(0.2),
-        backgroundColor: colorScheme.secondary.withOpacity(0.1),
+        selectedColor: colorScheme.primary.withAlpha(51),
+        backgroundColor: colorScheme.secondary.withAlpha(26),
         labelStyle: TextStyle(
           color: selected
               ? colorScheme.primary
-              : colorScheme.onBackground,
+              : colorScheme.onSurface,
         ),
         side: BorderSide(
           color: selected ? colorScheme.primary : colorScheme.secondary,
