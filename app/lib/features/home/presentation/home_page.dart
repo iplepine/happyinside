@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:happyinside/shared/services/quote_service.dart';
 
 import 'controllers/home_controller.dart';
 import 'intent/home_intent.dart';
@@ -29,6 +30,11 @@ class _HomeViewState extends State<_HomeView>
   late final PageController _pageController = PageController(
     viewportFraction: 0.85,
   );
+  bool _shouldScrollToTop = false;
+
+  // --- 명언 ---
+  late final QuoteService _quoteService;
+  late final Map<String, String> _dailyQuote;
 
   // --- 오버레이 및 제스처 상태 ---
   OverlayEntry? _overlayEntry;
@@ -48,6 +54,9 @@ class _HomeViewState extends State<_HomeView>
     _controller = HomeController();
     _controller.addListener(_onStateChanged);
     _controller.onIntent(LoadRecentRecords());
+
+    _quoteService = QuoteService();
+    _dailyQuote = _quoteService.getQuoteOfTheDay();
 
     _animationController = AnimationController(
       vsync: this,
@@ -69,6 +78,7 @@ class _HomeViewState extends State<_HomeView>
   void _goToWritePage(BuildContext context, int score) {
     context.push('/write', extra: score).then((result) {
       if (result == true) {
+        _shouldScrollToTop = true;
         _controller.onIntent(LoadRecentRecords());
       }
     });
@@ -140,6 +150,21 @@ class _HomeViewState extends State<_HomeView>
   @override
   Widget build(BuildContext context) {
     final state = _controller.state;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    if (_shouldScrollToTop && state.recentRecords.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_pageController.hasClients) {
+          _pageController.animateToPage(
+            0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+      _shouldScrollToTop = false; // 플래그 리셋
+    }
+
     // GestureDetector가 전체 화면 터치를 감지하도록 함
     return GestureDetector(
       onPanStart: (details) => _handleDragStart(details.globalPosition),
@@ -168,21 +193,29 @@ class _HomeViewState extends State<_HomeView>
             // --- 기본 UI ---
             Positioned.fill(
               child: SafeArea(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 24),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _buildRecentRecords(context, state),
-                    ),
-                    if (state.recentRecords.isNotEmpty)
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 24),
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: _buildPageIndicator(state),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildRecentRecords(context, state),
                       ),
-                    const Spacer(),
-                    const SizedBox(height: 96), // FAB 공간
-                  ],
+                      if (state.recentRecords.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: _buildPageIndicator(state),
+                        ),
+                      const SizedBox(height: 24),
+                      const Divider(indent: 32, endIndent: 32),
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                        child: _buildQuoteOfTheDay(),
+                      ),
+                      SizedBox(height: 96 + bottomPadding), // FAB와 하단 여백 공간
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -190,7 +223,7 @@ class _HomeViewState extends State<_HomeView>
             // --- FAB ---
             // Positioned를 사용하여 FAB를 화면 하단 중앙에 배치
             Positioned(
-              bottom: 32,
+              bottom: 32 + bottomPadding, // 하단 패딩 적용
               left: 0,
               right: 0,
               child: Opacity(
@@ -202,7 +235,7 @@ class _HomeViewState extends State<_HomeView>
             // --- Score Slider (오버레이) ---
             if (_isDragging)
               Positioned(
-                bottom: 32,
+                bottom: 32 + bottomPadding, // 하단 패딩 적용
                 left: 0,
                 right: 0,
                 child: Center(
@@ -222,7 +255,7 @@ class _HomeViewState extends State<_HomeView>
   Widget _buildRecentRecords(BuildContext context, HomeState state) {
     if (state.recentRecords.isEmpty) {
       return SizedBox(
-        height: 120,
+        height: 160, // 높이 증가
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -243,7 +276,7 @@ class _HomeViewState extends State<_HomeView>
     return ScrollConfiguration(
       behavior: MyCustomScrollBehavior(),
       child: SizedBox(
-        height: 120,
+        height: 160, // 높이 증가
         width: double.infinity,
         child: PageView.builder(
           clipBehavior: Clip.none,
@@ -286,10 +319,36 @@ class _HomeViewState extends State<_HomeView>
                       const SizedBox(height: 8),
                       Text(
                         record.content,
-                        maxLines: 3,
+                        maxLines: 3, // 3줄로 복원
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: 8),
+                      if (record.tags.isNotEmpty)
+                        Wrap(
+                          spacing: 6.0,
+                          runSpacing: 4.0,
+                          alignment: WrapAlignment.center,
+                          children: record.tags
+                              .map(
+                                (tag) => Chip(
+                                  label: Text(
+                                    '#$tag',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withAlpha(50),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              )
+                              .toList(),
+                        ),
                     ],
                   ),
                 ),
@@ -323,6 +382,32 @@ class _HomeViewState extends State<_HomeView>
           ),
         );
       }),
+    );
+  }
+
+  Widget _buildQuoteOfTheDay() {
+    return Column(
+      children: [
+        Text(
+          '“${_dailyQuote['quote']!}”',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 15,
+            fontStyle: FontStyle.italic,
+            color: Theme.of(context).textTheme.bodySmall?.color,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '- ${_dailyQuote['author']!} -',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).textTheme.bodySmall?.color,
+          ),
+        ),
+      ],
     );
   }
 
