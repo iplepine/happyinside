@@ -7,8 +7,10 @@
 // The application's name. By default this is also the title of the Flutter window.
 PRODUCT_NAME = app
 
-// The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.app
+// The bundle identifier of your application.
+// This is used as CFBundleIdentifier in the Info.plist file.
+PRODUCT_BUNDLE_IDENTIFIER = com.jyoon.happyinside
 
-// The copyright displayed in application information
+// The copyright of your application.
+// This is used as NSHumanReadableCopyright in the Info.plist file.
 PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
