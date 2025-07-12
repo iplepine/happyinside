@@ -37,15 +37,12 @@ class _HomeViewState extends State<_HomeView>
   late final Map<String, String> _dailyQuote;
 
   // --- 오버레이 및 제스처 상태 ---
-  OverlayEntry? _overlayEntry;
   int _sliderScore = 4;
   final double _sliderWidth = 220;
   Offset? _lastDragPosition;
   bool _isDragging = false; // 현재 드래그/선택 중인지 상태
 
   // --- 애니메이션 상태 ---
-  late AnimationController _animationController;
-  late Animation<Rect?> _heroAnimation;
   final GlobalKey _fabKey = GlobalKey(); // FAB 위치 추적용
 
   @override
@@ -57,11 +54,6 @@ class _HomeViewState extends State<_HomeView>
 
     _quoteService = QuoteService();
     _dailyQuote = _quoteService.getQuoteOfTheDay();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-    );
   }
 
   @override
@@ -69,7 +61,6 @@ class _HomeViewState extends State<_HomeView>
     _controller.removeListener(_onStateChanged);
     _controller.dispose();
     _pageController.dispose();
-    _animationController.dispose();
     super.dispose();
   }
 
@@ -165,11 +156,8 @@ class _HomeViewState extends State<_HomeView>
       _shouldScrollToTop = false; // 플래그 리셋
     }
 
-    // GestureDetector가 전체 화면 터치를 감지하도록 함
+    // 화면 전체의 탭을 감지하여 드래그 취소
     return GestureDetector(
-      onPanStart: (details) => _handleDragStart(details.globalPosition),
-      onPanUpdate: (details) => _handleDragUpdate(details.globalPosition),
-      onPanEnd: (details) => _handleDragEnd(),
       onTap: () {
         // 드래그 중이 아닐 때 탭하면 취소
         if (_isDragging) {
@@ -180,6 +168,8 @@ class _HomeViewState extends State<_HomeView>
           });
         }
       },
+      // Scaffold의 배경을 터치해도 onTap이 감지되도록 동작 설정
+      behavior: HitTestBehavior.opaque,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
@@ -228,7 +218,16 @@ class _HomeViewState extends State<_HomeView>
               right: 0,
               child: Opacity(
                 opacity: _isDragging ? 0.0 : 1.0,
-                child: _buildFAB(context, state),
+                child: GestureDetector(
+                  onTapDown: (details) =>
+                      _handleDragStart(details.globalPosition),
+                  onTapUp: (details) => _handleDragEnd(),
+                  onPanUpdate: (details) =>
+                      _handleDragUpdate(details.globalPosition),
+                  onPanEnd: (details) => _handleDragEnd(),
+                  dragStartBehavior: DragStartBehavior.down,
+                  child: _buildFAB(context, state),
+                ),
               ),
             ),
 
