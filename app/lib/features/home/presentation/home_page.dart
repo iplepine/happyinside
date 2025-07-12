@@ -7,6 +7,7 @@ import 'controllers/home_controller.dart';
 import 'intent/home_intent.dart';
 import 'state/home_state.dart';
 import 'widgets/animated_score_button.dart';
+import 'widgets/recent_records_section.dart';
 import 'widgets/score_slider.dart';
 
 class HomePage extends StatelessWidget {
@@ -23,13 +24,8 @@ class _HomeView extends StatefulWidget {
   State<_HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<_HomeView>
-    with SingleTickerProviderStateMixin {
+class _HomeViewState extends State<_HomeView> {
   late final HomeController _controller;
-  int _currentPage = 0;
-  late final PageController _pageController = PageController(
-    viewportFraction: 0.85,
-  );
   bool _shouldScrollToTop = false;
 
   // --- 명언 ---
@@ -39,7 +35,6 @@ class _HomeViewState extends State<_HomeView>
   // --- 오버레이 및 제스처 상태 ---
   int _sliderScore = 4;
   final double _sliderWidth = 220;
-  Offset? _lastDragPosition;
   bool _isDragging = false; // 현재 드래그/선택 중인지 상태
 
   // --- 애니메이션 상태 ---
@@ -60,7 +55,6 @@ class _HomeViewState extends State<_HomeView>
   void dispose() {
     _controller.removeListener(_onStateChanged);
     _controller.dispose();
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -69,7 +63,9 @@ class _HomeViewState extends State<_HomeView>
   void _goToWritePage(BuildContext context, int score) {
     context.push('/write', extra: score).then((result) {
       if (result == true) {
-        _shouldScrollToTop = true;
+        setState(() {
+          _shouldScrollToTop = true;
+        });
         _controller.onIntent(LoadRecentRecords());
       }
     });
@@ -87,7 +83,6 @@ class _HomeViewState extends State<_HomeView>
     if (fabRect.contains(startPosition)) {
       setState(() {
         _isDragging = true;
-        _lastDragPosition = startPosition;
       });
       _updateScoreFromLocal(startPosition);
     }
@@ -95,10 +90,6 @@ class _HomeViewState extends State<_HomeView>
 
   void _handleDragUpdate(Offset currentPosition) {
     if (!_isDragging) return;
-
-    setState(() {
-      _lastDragPosition = currentPosition;
-    });
     _updateScoreFromLocal(currentPosition);
   }
 
@@ -110,7 +101,6 @@ class _HomeViewState extends State<_HomeView>
 
     setState(() {
       _isDragging = false;
-      _lastDragPosition = null;
       _sliderScore = 3; // 기본값으로 리셋
     });
   }
@@ -143,19 +133,6 @@ class _HomeViewState extends State<_HomeView>
     final state = _controller.state;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    if (_shouldScrollToTop && state.recentRecords.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_pageController.hasClients) {
-          _pageController.animateToPage(
-            0,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOut,
-          );
-        }
-      });
-      _shouldScrollToTop = false; // 플래그 리셋
-    }
-
     // 화면 전체의 탭을 감지하여 드래그 취소
     return GestureDetector(
       onTap: () {
@@ -163,7 +140,6 @@ class _HomeViewState extends State<_HomeView>
         if (_isDragging) {
           setState(() {
             _isDragging = false;
-            _lastDragPosition = null;
             _sliderScore = 3;
           });
         }
@@ -189,13 +165,16 @@ class _HomeViewState extends State<_HomeView>
                       const SizedBox(height: 24),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _buildRecentRecords(context, state),
-                      ),
-                      if (state.recentRecords.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: _buildPageIndicator(state),
+                        child: RecentRecordsSection(
+                          records: state.recentRecords,
+                          shouldScrollToTop: _shouldScrollToTop,
+                          onDidScrollToTop: () {
+                            setState(() {
+                              _shouldScrollToTop = false;
+                            });
+                          },
                         ),
+                      ),
                       const SizedBox(height: 24),
                       const Divider(indent: 32, endIndent: 32),
                       const SizedBox(height: 24),
@@ -251,139 +230,6 @@ class _HomeViewState extends State<_HomeView>
     );
   }
 
-  Widget _buildRecentRecords(BuildContext context, HomeState state) {
-    if (state.recentRecords.isEmpty) {
-      return SizedBox(
-        height: 160, // 높이 증가
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.sentiment_dissatisfied, size: 48, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
-                '아직 행복 기록이 없어요!\n오늘의 행복을 빠르게 기록해보세요 :)',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-                maxLines: 3,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    return ScrollConfiguration(
-      behavior: MyCustomScrollBehavior(),
-      child: SizedBox(
-        height: 160, // 높이 증가
-        width: double.infinity,
-        child: PageView.builder(
-          clipBehavior: Clip.none,
-          itemCount: state.recentRecords.length,
-          controller: _pageController,
-          onPageChanged: (index) => setState(() => _currentPage = index),
-          itemBuilder: (context, index) {
-            final record = state.recentRecords[index];
-            return Center(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-                margin: EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: _currentPage == index ? 0 : 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    if (_currentPage == index)
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                  ],
-                ),
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        _formatDate(record.createdAt),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        record.content,
-                        maxLines: 3, // 3줄로 복원
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      if (record.tags.isNotEmpty)
-                        Wrap(
-                          spacing: 6.0,
-                          runSpacing: 4.0,
-                          alignment: WrapAlignment.center,
-                          children: record.tags
-                              .map(
-                                (tag) => Chip(
-                                  label: Text(
-                                    '#$tag',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withAlpha(50),
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                              )
-                              .toList(),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return "${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}";
-  }
-
-  Widget _buildPageIndicator(HomeState state) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(state.recentRecords.length, (index) {
-        final isActive = index == _currentPage;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: isActive ? 16 : 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: isActive
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey[300],
-            borderRadius: BorderRadius.circular(4),
-          ),
-        );
-      }),
-    );
-  }
-
   Widget _buildQuoteOfTheDay() {
     return Column(
       children: [
@@ -419,13 +265,4 @@ class _HomeViewState extends State<_HomeView>
       ),
     );
   }
-}
-
-// 웹에서도 마우스 드래그로 스와이프가 가능하도록 설정
-class MyCustomScrollBehavior extends MaterialScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-  };
 }
