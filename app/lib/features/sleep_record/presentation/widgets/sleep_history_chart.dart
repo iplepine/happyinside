@@ -5,8 +5,13 @@ import '../../domain/models/sleep_record.dart';
 
 class SleepHistoryChart extends StatelessWidget {
   final List<SleepRecord> records;
+  final void Function(SleepRecord record)? onBarLongPressed;
 
-  const SleepHistoryChart({super.key, required this.records});
+  const SleepHistoryChart({
+    super.key,
+    required this.records,
+    this.onBarLongPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +36,15 @@ class SleepHistoryChart extends StatelessWidget {
             alignment: BarChartAlignment.spaceAround,
             maxY: 10, // Y축 최대값: 수면 만족도 10점
             barTouchData: BarTouchData(
+              touchCallback: (FlTouchEvent event, barTouchResponse) {
+                if (event is FlLongPressStart &&
+                    barTouchResponse?.spot != null) {
+                  final index = barTouchResponse!.spot!.touchedBarGroupIndex;
+                  if (index >= 0 && index < chartData.length) {
+                    onBarLongPressed?.call(chartData[index]);
+                  }
+                }
+              },
               touchTooltipData: BarTouchTooltipData(
                 getTooltipItem: (group, groupIndex, rod, rodIndex) {
                   final record = chartData[groupIndex];

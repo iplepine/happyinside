@@ -4,9 +4,13 @@ import 'package:happyinside/core/errors/failures.dart';
 import '../../../di/injection.dart';
 import '../domain/models/sleep_record.dart';
 import '../domain/usecases/add_sleep_record_usecase.dart';
+import '../domain/usecases/delete_sleep_record_usecase.dart';
+import '../domain/usecases/update_sleep_record_usecase.dart';
 
 class SleepRecordPage extends StatefulWidget {
-  const SleepRecordPage({super.key});
+  final SleepRecord? initialRecord;
+
+  const SleepRecordPage({super.key, this.initialRecord});
 
   @override
   State<SleepRecordPage> createState() => _SleepRecordPageState();
@@ -17,24 +21,39 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
 
   late TimeOfDay _sleepTime;
   late TimeOfDay _wakeTime;
-  int _freshness = 5;
-  int _fatigue = 5;
-  int _sleepSatisfaction = 5;
+  late int _freshness;
+  late int _sleepSatisfaction;
+  int _fatigue = 5; // 수정 모드에서의 기본값
+
   final _contentController = TextEditingController();
   final _disruptionController = TextEditingController();
+
+  bool get _isUpdateMode => widget.initialRecord != null;
 
   @override
   void initState() {
     super.initState();
-    _initializeDefaultTimes();
+    if (_isUpdateMode) {
+      final record = widget.initialRecord!;
+      _sleepTime = TimeOfDay.fromDateTime(record.sleepTime);
+      _wakeTime = TimeOfDay.fromDateTime(record.wakeTime);
+      _freshness = record.freshness;
+      _sleepSatisfaction = record.sleepSatisfaction;
+      _fatigue = record.fatigue ?? 5;
+      _contentController.text = record.content ?? '';
+      _disruptionController.text = record.disruptionFactors ?? '';
+    } else {
+      _initializeDefaultTimes();
+    }
   }
 
   void _initializeDefaultTimes() {
     final now = DateTime.now();
     _wakeTime = TimeOfDay.fromDateTime(now);
-
     final recommendedSleepTime = now.subtract(const Duration(hours: 8));
     _sleepTime = TimeOfDay.fromDateTime(recommendedSleepTime);
+    _freshness = 5;
+    _sleepSatisfaction = 5;
   }
 
   @override
@@ -48,6 +67,9 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
     BuildContext context, {
     required bool isSleepTime,
   }) async {
+    // 수정 모드에서는 시간 변경 불가
+    if (_isUpdateMode) return;
+
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: isSleepTime ? _sleepTime : _wakeTime,
@@ -65,68 +87,153 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
 
   void _onSave() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final now = DateTime.now();
-      // 일어난 시간을 오늘 날짜로 설정
-      final wakeDateTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        _wakeTime.hour,
-        _wakeTime.minute,
-      );
-      // 잠든 시간을 우선 오늘 날짜로 설정
-      var sleepDateTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        _sleepTime.hour,
-        _sleepTime.minute,
-      );
-
-      // 만약 잠든 시간(23:00)이 일어난 시간(07:00)보다 뒤라면, 잠든 날짜를 하루 전으로 조정
-      if (sleepDateTime.isAfter(wakeDateTime)) {
-        sleepDateTime = sleepDateTime.subtract(const Duration(days: 1));
-      }
-
-      final record = SleepRecord(
-        id: UniqueKey().toString(),
-        sleepTime: sleepDateTime,
-        wakeTime: wakeDateTime,
-        freshness: _freshness,
-        fatigue: _fatigue,
-        sleepSatisfaction: _sleepSatisfaction,
-        content: _contentController.text,
-        disruptionFactors: _disruptionController.text,
-        createdAt: now,
-      );
-
-      final addSleepRecordUseCase = Injection.getIt<AddSleepRecordUseCase>();
-      try {
-        await addSleepRecordUseCase(record);
-
-        if (mounted) {
-          Navigator.pop(context, true);
-        }
-      } on SleepTimeOverlapException catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(e.toString())));
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
-        }
+      if (_isUpdateMode) {
+        _updateRecord();
+      } else {
+        _createRecord();
       }
     }
+  }
+
+  Future<void> _createRecord() async {
+    final now = DateTime.now();
+    var sleepDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _sleepTime.hour,
+      _sleepTime.minute,
+    );
+    final wakeDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _wakeTime.hour,
+      _wakeTime.minute,
+    );
+
+    if (sleepDateTime.isAfter(wakeDateTime)) {
+      sleepDateTime = sleepDateTime.subtract(const Duration(days: 1));
+    }
+
+    final newRecord = SleepRecord(
+      id: UniqueKey().toString(),
+      sleepTime: sleepDateTime,
+      wakeTime: wakeDateTime,
+      freshness: _freshness,
+      sleepSatisfaction: _sleepSatisfaction,
+      disruptionFactors: _disruptionController.text,
+      createdAt: now,
+      // 생성 시에는 피로도 관련 정보는 null
+      fatigue: null,
+      content: null,
+    );
+
+    final useCase = Injection.getIt<AddSleepRecordUseCase>();
+    try {
+      await useCase(newRecord);
+      if (mounted) Navigator.pop(context, true);
+    } on SleepTimeOverlapException catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
+    }
+  }
+
+  Future<void> _updateRecord() async {
+    final updatedRecord = widget.initialRecord!.copyWith(
+      freshness: _freshness,
+      sleepSatisfaction: _sleepSatisfaction,
+      disruptionFactors: _disruptionController.text,
+      fatigue: _fatigue,
+      content: _contentController.text,
+    );
+
+    final useCase = Injection.getIt<UpdateSleepRecordUseCase>();
+    try {
+      await useCase(updatedRecord);
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
+    }
+  }
+
+  Future<void> _deleteRecord() async {
+    if (!_isUpdateMode) return;
+
+    try {
+      final initialRecord = widget.initialRecord;
+      if (initialRecord == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('삭제할 기록이 없습니다.')));
+        }
+        return;
+      }
+      final useCase = Injection.getIt<DeleteSleepRecordUseCase>();
+      await useCase(initialRecord.id);
+      if (mounted) {
+        // 홈 화면으로 돌아가서 리스트 갱신
+        Navigator.pop(context, true);
+      }
+    } catch (e, stack) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('삭제 중 오류가 발생했습니다: $e')));
+      }
+    }
+  }
+
+  void _showDeleteConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('기록 삭제'),
+          content: const Text('정말로 이 수면 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('취소'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('삭제'),
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+                _deleteRecord();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('수면 기록하기')),
+      appBar: AppBar(
+        title: Text(_isUpdateMode ? '수면 기록 편집' : '수면 기록하기'),
+        actions: [
+          if (_isUpdateMode)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _showDeleteConfirmDialog,
+            ),
+        ],
+      ),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -137,12 +244,14 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                 label: '잠든 시간',
                 time: _sleepTime,
                 onTap: () => _selectTime(context, isSleepTime: true),
+                isUpdateMode: _isUpdateMode,
               ),
               const SizedBox(height: 16),
               _buildTimePicker(
                 label: '일어난 시간',
                 time: _wakeTime,
                 onTap: () => _selectTime(context, isSleepTime: false),
+                isUpdateMode: _isUpdateMode,
               ),
               const SizedBox(height: 24),
               _buildSlider(
@@ -166,22 +275,26 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                 ),
                 maxLines: 2,
               ),
-              const SizedBox(height: 24),
-              _buildSlider(
-                label: '하루 중 피로도',
-                value: _fatigue,
-                onChanged: (v) => setState(() => _fatigue = v),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _contentController,
-                decoration: const InputDecoration(
-                  labelText: '피로도 관련 기록',
-                  hintText: '예: 오후에 집중력 저하, 특정 스트레스 이벤트 등',
-                  border: OutlineInputBorder(),
+
+              if (_isUpdateMode) ...[
+                const SizedBox(height: 24),
+                _buildSlider(
+                  label: '하루 중 피로도',
+                  value: _fatigue,
+                  onChanged: (v) => setState(() => _fatigue = v),
                 ),
-                maxLines: 3,
-              ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _contentController,
+                  decoration: const InputDecoration(
+                    labelText: '피로도 관련 기록',
+                    hintText: '예: 오후에 집중력 저하, 특정 스트레스 이벤트 등',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: _onSave,
@@ -201,13 +314,16 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
     required String label,
     required TimeOfDay time,
     required VoidCallback onTap,
+    bool isUpdateMode = false,
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.grey.withAlpha(26),
+          color: isUpdateMode
+              ? Colors.grey.withAlpha(15)
+              : Colors.grey.withAlpha(26),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -221,8 +337,10 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
               time.format(context),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_drop_down, color: Colors.grey),
+            if (!isUpdateMode) ...[
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_drop_down, color: Colors.grey),
+            ],
           ],
         ),
       ),

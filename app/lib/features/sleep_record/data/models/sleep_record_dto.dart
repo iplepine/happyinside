@@ -17,7 +17,7 @@ class SleepRecordDto {
   final int freshness;
 
   @HiveField(4)
-  final int fatigue;
+  final int? fatigue;
 
   @HiveField(5)
   final int sleepSatisfaction;
@@ -36,7 +36,7 @@ class SleepRecordDto {
     required this.sleepTime,
     required this.wakeTime,
     required this.freshness,
-    required this.fatigue,
+    this.fatigue,
     required this.sleepSatisfaction,
     this.content,
     this.disruptionFactors,

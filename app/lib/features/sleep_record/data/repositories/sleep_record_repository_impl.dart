@@ -15,6 +15,16 @@ class SleepRecordRepositoryImpl implements SleepRecordRepository {
   }
 
   @override
+  Future<void> updateRecord(SleepRecord record) async {
+    await _box.put(record.id, _toDto(record));
+  }
+
+  @override
+  Future<void> deleteRecord(String id) async {
+    await _box.delete(id);
+  }
+
+  @override
   Future<List<SleepRecord>> getAllRecords() async {
     return _box.values.map(_fromDto).toList();
   }

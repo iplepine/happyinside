@@ -8,5 +8,7 @@ abstract class SleepRecordRepository {
     DateTime start,
     DateTime end,
   );
-  // Future<void> deleteRecord(String id); // 나중에 삭제 기능 추가 시
+  Future<List<SleepRecord>> getAllRecords();
+  Future<void> updateRecord(SleepRecord record);
+  Future<void> deleteRecord(String id);
 }
