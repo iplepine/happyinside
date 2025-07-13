@@ -169,7 +169,7 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.1),
+          color: Colors.grey.withAlpha(26),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

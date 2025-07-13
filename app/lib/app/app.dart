@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'routes/app_router.dart';
 import 'theme/app_theme.dart';
 
@@ -7,11 +8,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: AppRouter.router,
-      title: 'HappyInside',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+    return ProviderScope(
+      child: MaterialApp.router(
+        routerConfig: AppRouter.router,
+        title: 'HappyInside',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+      ),
     );
   }
 }

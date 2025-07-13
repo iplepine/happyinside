@@ -11,6 +11,7 @@ import '../features/sleep_record/data/models/sleep_record_dto.dart';
 import '../features/sleep_record/data/repositories/sleep_record_repository_impl.dart';
 import '../features/sleep_record/domain/repositories/sleep_record_repository.dart';
 import '../features/sleep_record/domain/usecases/add_sleep_record_usecase.dart';
+import '../features/sleep_record/domain/usecases/get_sleep_records_usecase.dart';
 
 /// 의존성 주입 설정
 class Injection {
@@ -53,6 +54,9 @@ class Injection {
     );
     _getIt.registerSingleton<AddSleepRecordUseCase>(
       AddSleepRecordUseCase(_getIt<SleepRecordRepository>()),
+    );
+    _getIt.registerSingleton<GetSleepRecordsUseCase>(
+      GetSleepRecordsUseCase(_getIt<SleepRecordRepository>()),
     );
   }
 

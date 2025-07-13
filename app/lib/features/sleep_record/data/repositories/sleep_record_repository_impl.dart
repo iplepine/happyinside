@@ -14,6 +14,25 @@ class SleepRecordRepositoryImpl implements SleepRecordRepository {
     await _box.put(record.id, _toDto(record));
   }
 
+  @override
+  Future<List<SleepRecord>> getRecordsBetween(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final records = _box.values
+        .where(
+          (dto) =>
+              dto.createdAt.isAfter(start.subtract(const Duration(days: 1))) &&
+              dto.createdAt.isBefore(end.add(const Duration(days: 1))),
+        )
+        .map(_fromDto)
+        .toList();
+
+    // 최신순으로 정렬
+    records.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return records;
+  }
+
   // --- Mappers ---
 
   SleepRecordDto _toDto(SleepRecord record) {
