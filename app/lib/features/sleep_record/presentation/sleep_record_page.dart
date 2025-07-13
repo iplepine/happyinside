@@ -29,6 +29,7 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
   final _disruptionController = TextEditingController();
 
   bool get _isUpdateMode => widget.initialRecord != null;
+  bool _canEditFatigue = false;
 
   @override
   void initState() {
@@ -42,6 +43,12 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
       _fatigue = record.fatigue ?? 5;
       _contentController.text = record.content ?? '';
       _disruptionController.text = record.disruptionFactors ?? '';
+
+      // 피로도 수정 가능 여부 체크
+      final now = DateTime.now();
+      _canEditFatigue = record.wakeTime.isBefore(
+        now.subtract(const Duration(hours: 1)),
+      );
     } else {
       _initializeDefaultTimes();
     }
@@ -67,9 +74,6 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
     BuildContext context, {
     required bool isSleepTime,
   }) async {
-    // 수정 모드에서는 시간 변경 불가
-    if (_isUpdateMode) return;
-
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: isSleepTime ? _sleepTime : _wakeTime,
@@ -147,7 +151,29 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
   }
 
   Future<void> _updateRecord() async {
+    final now = DateTime.now();
+    var sleepDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _sleepTime.hour,
+      _sleepTime.minute,
+    );
+    final wakeDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _wakeTime.hour,
+      _wakeTime.minute,
+    );
+
+    if (sleepDateTime.isAfter(wakeDateTime)) {
+      sleepDateTime = sleepDateTime.subtract(const Duration(days: 1));
+    }
+
     final updatedRecord = widget.initialRecord!.copyWith(
+      sleepTime: sleepDateTime,
+      wakeTime: wakeDateTime,
       freshness: _freshness,
       sleepSatisfaction: _sleepSatisfaction,
       disruptionFactors: _disruptionController.text,
@@ -159,6 +185,12 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
     try {
       await useCase(updatedRecord);
       if (mounted) Navigator.pop(context, true);
+    } on SleepTimeOverlapException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     } catch (e) {
       if (mounted)
         ScaffoldMessenger.of(
@@ -244,14 +276,12 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                 label: '잠든 시간',
                 time: _sleepTime,
                 onTap: () => _selectTime(context, isSleepTime: true),
-                isUpdateMode: _isUpdateMode,
               ),
               const SizedBox(height: 16),
               _buildTimePicker(
                 label: '일어난 시간',
                 time: _wakeTime,
                 onTap: () => _selectTime(context, isSleepTime: false),
-                isUpdateMode: _isUpdateMode,
               ),
               const SizedBox(height: 24),
               _buildSlider(
@@ -279,7 +309,7 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
               _buildSlider(
                 label: '하루 중 피로도',
                 value: _fatigue,
-                enabled: _isUpdateMode,
+                enabled: _isUpdateMode && _canEditFatigue,
                 onChanged: (v) => setState(() => _fatigue = v),
               ),
               const SizedBox(height: 16),
@@ -294,11 +324,18 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                         duration: Duration(seconds: 2),
                       ),
                     );
+                  } else if (!_canEditFatigue) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('피로도는 기상 후 1시간 뒤부터 기록할 수 있습니다.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
                   }
                 },
                 child: TextFormField(
                   controller: _contentController,
-                  enabled: _isUpdateMode,
+                  enabled: _isUpdateMode && _canEditFatigue,
                   decoration: const InputDecoration(
                     labelText: '피로도 관련 기록',
                     hintText: '예: 오후에 집중력 저하, 특정 스트레스 이벤트 등',
@@ -326,16 +363,13 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
     required String label,
     required TimeOfDay time,
     required VoidCallback onTap,
-    bool isUpdateMode = false,
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: isUpdateMode
-              ? Colors.grey.withAlpha(15)
-              : Colors.grey.withAlpha(26),
+          color: Colors.grey.withAlpha(26),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -349,10 +383,8 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
               time.format(context),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            if (!isUpdateMode) ...[
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_drop_down, color: Colors.grey),
-            ],
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_drop_down, color: Colors.grey),
           ],
         ),
       ),
@@ -368,12 +400,21 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
     return GestureDetector(
       onTap: () {
         if (!enabled) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('피로도는 오후에 기록할 수 있습니다. 먼저 아침 수면 기록을 저장해주세요.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
+          if (label == '하루 중 피로도' && _isUpdateMode && !_canEditFatigue) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('피로도는 기상 후 1시간 뒤부터 기록할 수 있습니다.'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('피로도는 오후에 기록할 수 있습니다. 먼저 아침 수면 기록을 저장해주세요.'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
         }
       },
       child: Column(
