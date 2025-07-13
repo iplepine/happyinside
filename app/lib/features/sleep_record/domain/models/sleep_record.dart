@@ -23,6 +23,19 @@ class SleepRecord extends Equatable {
     required this.createdAt,
   });
 
+  double get totalSleepHours {
+    return wakeTime.difference(sleepTime).inMinutes / 60.0;
+  }
+
+  double get averageScore {
+    final scores = [freshness, sleepSatisfaction];
+    if (fatigue != null) {
+      // 피로도는 부정적인 의미이므로, 11에서 빼서 긍정적인 점수로 변환 (10 -> 1, 1 -> 10)
+      scores.add(11 - fatigue!);
+    }
+    return scores.reduce((a, b) => a + b) / scores.length;
+  }
+
   SleepRecord copyWith({
     String? id,
     DateTime? sleepTime,

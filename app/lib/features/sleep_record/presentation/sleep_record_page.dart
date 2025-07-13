@@ -275,17 +275,30 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                 ),
                 maxLines: 2,
               ),
-
-              if (_isUpdateMode) ...[
-                const SizedBox(height: 24),
-                _buildSlider(
-                  label: '하루 중 피로도',
-                  value: _fatigue,
-                  onChanged: (v) => setState(() => _fatigue = v),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
+              const SizedBox(height: 24),
+              _buildSlider(
+                label: '하루 중 피로도',
+                value: _fatigue,
+                enabled: _isUpdateMode,
+                onChanged: (v) => setState(() => _fatigue = v),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () {
+                  if (!_isUpdateMode) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          '피로도는 오후에 기록할 수 있습니다. 먼저 아침 수면 기록을 저장해주세요.',
+                        ),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                child: TextFormField(
                   controller: _contentController,
+                  enabled: _isUpdateMode,
                   decoration: const InputDecoration(
                     labelText: '피로도 관련 기록',
                     hintText: '예: 오후에 집중력 저하, 특정 스트레스 이벤트 등',
@@ -293,8 +306,7 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                   ),
                   maxLines: 3,
                 ),
-              ],
-
+              ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: _onSave,
@@ -351,30 +363,43 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
     required String label,
     required int value,
     required ValueChanged<int> onChanged,
+    bool enabled = true,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        Row(
-          children: [
-            Expanded(
-              child: Slider(
-                value: value.toDouble(),
-                min: 1,
-                max: 10,
-                divisions: 9,
-                label: '$value',
-                onChanged: (v) => onChanged(v.round()),
+    return GestureDetector(
+      onTap: () {
+        if (!enabled) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('피로도는 오후에 기록할 수 있습니다. 먼저 아침 수면 기록을 저장해주세요.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  value: value.toDouble(),
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  label: '$value',
+                  onChanged: enabled ? (v) => onChanged(v.round()) : null,
+                ),
               ),
-            ),
-            SizedBox(
-              width: 30,
-              child: Text('$value', textAlign: TextAlign.right),
-            ),
-          ],
-        ),
-      ],
+              SizedBox(
+                width: 30,
+                child: Text('$value', textAlign: TextAlign.right),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
