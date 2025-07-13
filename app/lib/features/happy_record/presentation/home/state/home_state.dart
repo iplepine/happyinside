@@ -1,4 +1,4 @@
-import '../../../../core/models/record.dart';
+import '../../../../../core/models/record.dart';
 import 'package:flutter/foundation.dart';
 
 /// 홈 화면 상태

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../di/injection.dart';
 import '../domain/models/sleep_record.dart';

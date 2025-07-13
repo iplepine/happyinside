@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/models/record.dart';
+import '../../../../../core/models/record.dart';
 
 class RecentRecordsSection extends StatefulWidget {
   final List<Record> records;

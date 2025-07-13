@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/models/record.dart';
 import '../state/home_state.dart';
 import '../intent/home_intent.dart';
-import '../../../../di/injection.dart';
-import '../../../happy_record/domain/usecases/get_recent_records_usecase.dart';
+import '../../../../../di/injection.dart';
+import '../../../domain/usecases/get_recent_records_usecase.dart';
 
 class HomeController extends ChangeNotifier {
   final GetRecentRecordsUseCase getRecentRecordsUseCase =

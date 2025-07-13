@@ -10,8 +10,8 @@ import 'widgets/animated_score_button.dart';
 import 'widgets/recent_records_section.dart';
 import 'widgets/score_slider.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HappyHomePage extends StatelessWidget {
+  const HappyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
