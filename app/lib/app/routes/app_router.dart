@@ -3,6 +3,7 @@ import '../../features/main/presentation/main_home_page.dart';
 import '../../features/happy_record/presentation/write/write_page.dart';
 import '../../features/happy_record/presentation/home/happy_home_page.dart';
 import '../../features/sleep_record/presentation/sleep_home_page.dart';
+import '../../features/sleep_record/presentation/sleep_record_page.dart';
 
 /// 앱 라우터
 class AppRouter {
@@ -18,6 +19,10 @@ class AppRouter {
       GoRoute(
         path: '/sleep',
         builder: (context, state) => const SleepHomePage(),
+      ),
+      GoRoute(
+        path: '/sleep-record',
+        builder: (context, state) => const SleepRecordPage(),
       ),
       GoRoute(
         path: '/write',
