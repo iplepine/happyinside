@@ -15,6 +15,28 @@ class SleepRecordRepositoryImpl implements SleepRecordRepository {
   }
 
   @override
+  Future<List<SleepRecord>> getAllRecords() async {
+    return _box.values.map(_fromDto).toList();
+  }
+
+  @override
+  Future<List<SleepRecord>> getOverlappingRecords(
+    String id,
+    DateTime start,
+    DateTime end,
+  ) async {
+    final List<SleepRecordDto> overlaps = [];
+    for (final dto in _box.values) {
+      if (dto.id == id) continue;
+
+      if (start.isBefore(dto.wakeTime) && dto.sleepTime.isBefore(end)) {
+        overlaps.add(dto);
+      }
+    }
+    return overlaps.map(_fromDto).toList();
+  }
+
+  @override
   Future<List<SleepRecord>> getRecordsBetween(
     DateTime start,
     DateTime end,

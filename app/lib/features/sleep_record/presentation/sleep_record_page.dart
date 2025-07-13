@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:happyinside/core/errors/failures.dart';
 
 import '../../../di/injection.dart';
 import '../domain/models/sleep_record.dart';
@@ -66,6 +67,11 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
         _wakeTime.minute,
       );
 
+      // 잠든 시간이 일어난 시간보다 늦을 경우 (다음 날로 넘어간 경우)
+      if (wakeDateTime.isBefore(sleepDateTime)) {
+        wakeDateTime.add(const Duration(days: 1));
+      }
+
       final record = SleepRecord(
         id: UniqueKey().toString(),
         sleepTime: sleepDateTime,
@@ -79,10 +85,24 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
       );
 
       final addSleepRecordUseCase = Injection.getIt<AddSleepRecordUseCase>();
-      await addSleepRecordUseCase(record);
+      try {
+        await addSleepRecordUseCase(record);
 
-      if (mounted) {
-        Navigator.pop(context, true);
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+      } on SleepTimeOverlapException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.toString())));
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
+        }
       }
     }
   }
