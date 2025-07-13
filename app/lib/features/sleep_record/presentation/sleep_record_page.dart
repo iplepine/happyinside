@@ -150,35 +150,37 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                 value: _freshness,
                 onChanged: (v) => setState(() => _freshness = v),
               ),
+              const SizedBox(height: 24),
+              _buildSlider(
+                label: '수면 만족도',
+                value: _sleepSatisfaction,
+                onChanged: (v) => setState(() => _sleepSatisfaction = v),
+              ),
               const SizedBox(height: 16),
+              TextFormField(
+                controller: _disruptionController,
+                decoration: const InputDecoration(
+                  labelText: '수면 방해 요인',
+                  hintText: '예: 화장실 가느라 깸, 소음 등',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 24),
               _buildSlider(
                 label: '하루 중 피로도',
                 value: _fatigue,
                 onChanged: (v) => setState(() => _fatigue = v),
               ),
               const SizedBox(height: 16),
-              _buildSlider(
-                label: '수면 만족도',
-                value: _sleepSatisfaction,
-                onChanged: (v) => setState(() => _sleepSatisfaction = v),
-              ),
-              const SizedBox(height: 24),
               TextFormField(
                 controller: _contentController,
                 decoration: const InputDecoration(
-                  labelText: '구체적인 내용 (예: 오전에 괜찮았는지)',
+                  labelText: '피로도 관련 기록',
+                  hintText: '예: 오후에 집중력 저하, 특정 스트레스 이벤트 등',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _disruptionController,
-                decoration: const InputDecoration(
-                  labelText: '수면 방해 요인 (예: 화장실 가느라 깸)',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 2,
               ),
               const SizedBox(height: 40),
               ElevatedButton(
