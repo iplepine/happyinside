@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:happyinside/features/sleep_record/presentation/controller/sleep_home_controller.dart';
-import 'package:intl/intl.dart';
+import 'package:happyinside/features/sleep_record/presentation/widgets/sleep_history_chart.dart';
 
 class SleepHomePage extends ConsumerWidget {
   const SleepHomePage({super.key});
@@ -16,24 +16,9 @@ class SleepHomePage extends ConsumerWidget {
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         data: (records) {
-          if (records.isEmpty) {
-            return const Center(child: Text('기록이 없습니다.'));
-          }
-          return ListView.builder(
-            itemCount: records.length,
-            itemBuilder: (context, index) {
-              final record = records[index];
-              return ListTile(
-                title: Text(
-                  '${DateFormat('yyyy.MM.dd(E)', 'ko_KR').format(record.createdAt)} 기록',
-                ),
-                subtitle: Text(
-                  '수면 시간: ${DateFormat.Hm().format(record.sleepTime)} ~ ${DateFormat.Hm().format(record.wakeTime)}',
-                ),
-                trailing: Text('만족도: ${record.sleepSatisfaction}/10'),
-              );
-            },
-          );
+          // 최근 7개 기록만 선택
+          final recentRecords = records.take(7).toList();
+          return SleepHistoryChart(records: recentRecords);
         },
         error: (message) => Center(child: Text('오류: $message')),
       ),
