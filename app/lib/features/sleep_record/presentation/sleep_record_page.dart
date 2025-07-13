@@ -15,13 +15,27 @@ class SleepRecordPage extends StatefulWidget {
 class _SleepRecordPageState extends State<SleepRecordPage> {
   final _formKey = GlobalKey<FormState>();
 
-  TimeOfDay _sleepTime = TimeOfDay.now();
-  TimeOfDay _wakeTime = TimeOfDay.now();
+  late TimeOfDay _sleepTime;
+  late TimeOfDay _wakeTime;
   int _freshness = 5;
   int _fatigue = 5;
   int _sleepSatisfaction = 5;
   final _contentController = TextEditingController();
   final _disruptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDefaultTimes();
+  }
+
+  void _initializeDefaultTimes() {
+    final now = DateTime.now();
+    _wakeTime = TimeOfDay.fromDateTime(now);
+
+    final recommendedSleepTime = now.subtract(const Duration(hours: 8));
+    _sleepTime = TimeOfDay.fromDateTime(recommendedSleepTime);
+  }
 
   @override
   void dispose() {
@@ -52,13 +66,7 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
   void _onSave() async {
     if (_formKey.currentState?.validate() ?? false) {
       final now = DateTime.now();
-      final sleepDateTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        _sleepTime.hour,
-        _sleepTime.minute,
-      );
+      // 일어난 시간을 오늘 날짜로 설정
       final wakeDateTime = DateTime(
         now.year,
         now.month,
@@ -66,10 +74,18 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
         _wakeTime.hour,
         _wakeTime.minute,
       );
+      // 잠든 시간을 우선 오늘 날짜로 설정
+      var sleepDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        _sleepTime.hour,
+        _sleepTime.minute,
+      );
 
-      // 잠든 시간이 일어난 시간보다 늦을 경우 (다음 날로 넘어간 경우)
-      if (wakeDateTime.isBefore(sleepDateTime)) {
-        wakeDateTime.add(const Duration(days: 1));
+      // 만약 잠든 시간(23:00)이 일어난 시간(07:00)보다 뒤라면, 잠든 날짜를 하루 전으로 조정
+      if (sleepDateTime.isAfter(wakeDateTime)) {
+        sleepDateTime = sleepDateTime.subtract(const Duration(days: 1));
       }
 
       final record = SleepRecord(
