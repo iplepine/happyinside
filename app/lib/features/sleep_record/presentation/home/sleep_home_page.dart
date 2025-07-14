@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sleep_tracker/features/sleep_record/presentation/home/sleep_home_controller.dart';
-import 'package:sleep_tracker/features/sleep_record/presentation/home/widgets/sleep_history_chart.dart';
-import 'package:sleep_tracker/features/sleep_record/presentation/record/sleep_record_page.dart';
-import 'package:sleep_tracker/models/sleep_record.dart';
+import 'package:happyinside/features/sleep_record/domain/models/sleep_record.dart';
+import 'package:happyinside/features/sleep_record/presentation/controller/sleep_home_controller.dart';
+import 'package:happyinside/features/sleep_record/presentation/sleep_record_page.dart';
+import 'package:happyinside/features/sleep_record/presentation/widgets/sleep_history_chart.dart';
 
 class SleepHomePage extends ConsumerWidget {
   const SleepHomePage({Key? key}) : super(key: key);
@@ -15,25 +15,27 @@ class SleepHomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Sleep Tracker')),
       body: state.when(
-        data: (data) {
-          return Column(
-            children: [
-              SleepHistoryChart(
-                records: data.records,
-                onRecordSelected: (record) {
-                  _navigateToRecordPage(context, record);
-                },
-              ),
-            ],
-          );
-        },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Text('Error: $error'),
+        data: (records) => Column(
+          children: [
+            SleepHistoryChart(
+              records: records,
+              onBarLongPressed: (record) {
+                _navigateToRecordPage(context, ref, record);
+              },
+            ),
+          ],
+        ),
+        error: (message) => Center(child: Text('Error: $message')),
       ),
     );
   }
 
-  void _navigateToRecordPage(BuildContext context, [SleepRecord? record]) {
+  void _navigateToRecordPage(
+    BuildContext context,
+    WidgetRef ref, [
+    SleepRecord? record,
+  ]) {
     Navigator.push<bool>(
       context,
       MaterialPageRoute(
@@ -41,29 +43,29 @@ class SleepHomePage extends ConsumerWidget {
       ),
     ).then((result) {
       if (result == true) {
-        ref.read(sleepHomeControllerProvider.notifier).loadRecords();
+        ref.read(sleepHomeControllerProvider.notifier).fetchRecords();
       }
     });
   }
 
-  void _showCompleteRecordDialog(SleepRecord record) {
+  void _showCompleteRecordDialog(BuildContext context, SleepRecord record) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Complete Record'),
           content: const Text('Do you want to complete this record?'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 // TODO: Implement complete record logic
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text('Complete'),
             ),

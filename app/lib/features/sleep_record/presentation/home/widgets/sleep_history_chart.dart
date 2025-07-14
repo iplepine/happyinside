@@ -112,8 +112,6 @@ class _SleepHistoryChartState extends State<SleepHistoryChart> {
     return LineChart(
       LineChartData(
         lineBarsData: lineBars,
-        swapAnimationDuration: const Duration(milliseconds: 250),
-        swapAnimationCurve: Curves.linear,
         showingTooltipIndicators:
             _selectedSpotIndex != null && _selectedSpotIndex! < spots.length
             ? [
