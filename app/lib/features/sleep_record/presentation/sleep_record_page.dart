@@ -56,11 +56,23 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
 
   void _initializeDefaultTimes() {
     final now = DateTime.now();
-    _wakeTime = TimeOfDay.fromDateTime(now);
-    final recommendedSleepTime = now.subtract(const Duration(hours: 8));
-    _sleepTime = TimeOfDay.fromDateTime(recommendedSleepTime);
-    _freshness = 5;
-    _sleepSatisfaction = 5;
+
+    if (widget.initialRecord != null) {
+      // initialRecord가 있으면 해당 값으로 설정
+      _sleepTime = TimeOfDay.fromDateTime(widget.initialRecord!.sleepTime);
+      _wakeTime = TimeOfDay.fromDateTime(widget.initialRecord!.wakeTime);
+      _freshness = widget.initialRecord!.freshness;
+      _sleepSatisfaction = widget.initialRecord!.sleepSatisfaction;
+      _disruptionController.text =
+          widget.initialRecord!.disruptionFactors ?? '';
+    } else {
+      // 기본 모드: 기존 로직
+      _wakeTime = TimeOfDay.fromDateTime(now);
+      final recommendedSleepTime = now.subtract(const Duration(hours: 8));
+      _sleepTime = TimeOfDay.fromDateTime(recommendedSleepTime);
+      _freshness = 5;
+      _sleepSatisfaction = 5;
+    }
   }
 
   @override
@@ -380,7 +392,13 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
             ),
             const Spacer(),
             Text(
-              time.format(context),
+              (time.hour == 0 && time.minute == 0) ||
+                      (label == '일어난 시간' &&
+                          widget.initialRecord != null &&
+                          widget.initialRecord!.sleepTime ==
+                              widget.initialRecord!.wakeTime)
+                  ? '시간 선택'
+                  : time.format(context),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 8),
