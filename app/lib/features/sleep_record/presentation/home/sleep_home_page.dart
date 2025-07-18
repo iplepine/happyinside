@@ -70,46 +70,150 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
           fatigue: null,
           content: null,
         );
-      } else if (_selectedMode == 'morning') {
-        // 일어난 후 모드: 현재 시간을 일어난 시간으로 설정
-        final wakeTime = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          now.hour,
-          now.minute,
-        );
-        final sleepTime = wakeTime.subtract(const Duration(hours: 8));
-        initialRecord = SleepRecord(
-          id: UniqueKey().toString(),
-          sleepTime: sleepTime,
-          wakeTime: wakeTime,
-          freshness: 5,
-          sleepSatisfaction: 5,
-          disruptionFactors: '',
-          createdAt: now,
-          fatigue: null,
-          content: null,
-        );
-      }
 
-      Navigator.of(context)
-          .push(
-            MaterialPageRoute(
-              builder: (_) => SleepRecordPage(initialRecord: initialRecord),
-            ),
-          )
-          .then((result) {
-            if (result == true) {
-              ref.read(sleepHomeControllerProvider.notifier).fetchRecords();
-            }
-          });
+        Navigator.of(context)
+            .push(
+              MaterialPageRoute(
+                builder: (_) => SleepRecordPage(initialRecord: initialRecord),
+              ),
+            )
+            .then((result) {
+              if (result == true) {
+                ref.read(sleepHomeControllerProvider.notifier).fetchRecords();
+              }
+            });
+      } else if (_selectedMode == 'morning') {
+        // 일어난 후 모드: 기존 기록 확인 후 처리
+        _handleMorningMode(now);
+      }
     }
 
     setState(() {
       _isDragging = false;
       _selectedMode = null;
     });
+  }
+
+  void _handleMorningMode(DateTime now) {
+    final state = ref.read(sleepHomeControllerProvider);
+
+    state.when(
+      loading: () => _createNewMorningRecord(now),
+      data: (records) {
+        print('=== Morning Mode Debug ===');
+        print('Total records: ${records.length}');
+
+        // 12시간 내에 잠든 시간은 있지만 일어난 시간이 없는 기록 찾기
+        final incompleteRecord = records.where((record) {
+          final timeDiff = now.difference(record.sleepTime).inHours;
+          final isIncomplete =
+              record.sleepTime == record.wakeTime; // 잠든 시간과 일어난 시간이 같음 (미완성)
+
+          print(
+            'Record: ${record.sleepTime} -> ${record.wakeTime}, timeDiff: $timeDiff, isIncomplete: $isIncomplete',
+          );
+
+          return timeDiff <= 12 && isIncomplete;
+        }).firstOrNull;
+
+        print('Found incomplete record: ${incompleteRecord != null}');
+
+        if (incompleteRecord != null) {
+          // 기존 기록이 있으면 수정할지 묻기
+          print('Showing update dialog');
+          _showUpdateDialog(incompleteRecord, now);
+        } else {
+          // 새 기록 생성
+          print('Creating new morning record');
+          _createNewMorningRecord(now);
+        }
+      },
+      error: (message) => _createNewMorningRecord(now),
+    );
+  }
+
+  void _showUpdateDialog(SleepRecord existingRecord, DateTime now) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('기존 기록 수정'),
+          content: Text(
+            '${existingRecord.sleepTime.hour.toString().padLeft(2, '0')}:${existingRecord.sleepTime.minute.toString().padLeft(2, '0')}에 잠든 기록이 있습니다.\n'
+            '이 기록에 일어난 시간을 추가하시겠습니까?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _createNewMorningRecord(now);
+              },
+              child: const Text('새 기록 만들기'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _updateExistingRecord(existingRecord, now);
+              },
+              child: const Text('기존 기록 수정'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _createNewMorningRecord(DateTime now) {
+    final wakeTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+    );
+    final sleepTime = wakeTime.subtract(const Duration(hours: 8));
+    final initialRecord = SleepRecord(
+      id: UniqueKey().toString(),
+      sleepTime: sleepTime,
+      wakeTime: wakeTime,
+      freshness: 5,
+      sleepSatisfaction: 5,
+      disruptionFactors: '',
+      createdAt: now,
+      fatigue: null,
+      content: null,
+    );
+
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => SleepRecordPage(initialRecord: initialRecord),
+          ),
+        )
+        .then((result) {
+          if (result == true) {
+            ref.read(sleepHomeControllerProvider.notifier).fetchRecords();
+          }
+        });
+  }
+
+  void _updateExistingRecord(SleepRecord existingRecord, DateTime now) {
+    // 기존 기록을 현재 시간으로 업데이트
+    final updatedRecord = existingRecord.copyWith(
+      wakeTime: DateTime(now.year, now.month, now.day, now.hour, now.minute),
+    );
+
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => SleepRecordPage(initialRecord: updatedRecord),
+          ),
+        )
+        .then((result) {
+          if (result == true) {
+            ref.read(sleepHomeControllerProvider.notifier).fetchRecords();
+          }
+        });
   }
 
   void _updateModeFromPosition(Offset globalPosition) {
