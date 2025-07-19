@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happyinside/di/injection.dart';
-import '../../domain/models/sleep_record.dart';
 import '../../domain/usecases/get_sleep_records_usecase.dart';
 import '../state/sleep_home_state.dart';
 

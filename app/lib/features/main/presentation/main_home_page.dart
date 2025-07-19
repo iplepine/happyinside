@@ -1,32 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../sleep_record/presentation/home/widgets/unfinished_sleep_notification.dart';
 
-class MainHomePage extends StatelessWidget {
+class MainHomePage extends ConsumerWidget {
   const MainHomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Happy Inside')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                context.push('/happy');
-              },
-              child: const Text('Happy Record'),
+      body: Column(
+        children: [
+          // 미완성 수면 기록 노티피케이션
+          const UnfinishedSleepNotification(),
+          const SizedBox(height: 20),
+          // 기존 버튼들
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      context.push('/happy');
+                    },
+                    child: const Text('Happy Record'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.push('/sleep');
+                    },
+                    child: const Text('Sleep Record'),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                context.push('/sleep');
-              },
-              child: const Text('Sleep Record'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

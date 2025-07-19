@@ -51,14 +51,14 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
       SleepRecord? initialRecord;
 
       if (_selectedMode == 'night') {
-        // 잠들기 전 모드: 현재 시간을 잠든 시간으로 설정
+        // 잠들기 전 모드: 현재 시간에서 10분 뒤를 잠든 시간으로 설정
         final sleepTime = DateTime(
           now.year,
           now.month,
           now.day,
           now.hour,
           now.minute,
-        );
+        ).add(const Duration(minutes: 10)); // 10분 뒤로 설정
         initialRecord = SleepRecord(
           id: UniqueKey().toString(),
           sleepTime: sleepTime,
