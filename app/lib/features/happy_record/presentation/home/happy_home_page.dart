@@ -7,6 +7,10 @@ import 'controllers/home_controller.dart';
 import 'intent/home_intent.dart';
 import 'state/home_state.dart';
 import 'widgets/animated_score_button.dart';
+import 'widgets/draggable_fab.dart';
+import 'widgets/drag_gesture_handler.dart';
+import 'widgets/home_content.dart';
+import 'widgets/quote_of_the_day.dart';
 import 'widgets/recent_records_section.dart';
 import 'widgets/score_slider.dart';
 
@@ -39,6 +43,7 @@ class _HomeViewState extends State<_HomeView> {
 
   // --- 애니메이션 상태 ---
   final GlobalKey _fabKey = GlobalKey(); // FAB 위치 추적용
+  late final DragGestureHandler _dragHandler;
 
   @override
   void initState() {
@@ -49,6 +54,17 @@ class _HomeViewState extends State<_HomeView> {
 
     _quoteService = QuoteService();
     _dailyQuote = _quoteService.getQuoteOfTheDay();
+
+    _dragHandler = DragGestureHandler(
+      sliderWidth: _sliderWidth,
+      onScoreChanged: (score) {
+        setState(() {
+          _sliderScore = score;
+        });
+      },
+      onDragEnd: _handleDragEnd,
+      fabKey: _fabKey,
+    );
   }
 
   @override
@@ -84,13 +100,13 @@ class _HomeViewState extends State<_HomeView> {
       setState(() {
         _isDragging = true;
       });
-      _updateScoreFromLocal(startPosition);
+      _dragHandler.handleDragStart(startPosition);
     }
   }
 
   void _handleDragUpdate(Offset currentPosition) {
     if (!_isDragging) return;
-    _updateScoreFromLocal(currentPosition);
+    _dragHandler.handleDragUpdate(currentPosition);
   }
 
   void _handleDragEnd() {
@@ -103,29 +119,6 @@ class _HomeViewState extends State<_HomeView> {
       _isDragging = false;
       _sliderScore = 3; // 기본값으로 리셋
     });
-  }
-
-  void _updateScoreFromLocal(Offset globalPosition) {
-    // 화면 중앙에 배치된 슬라이더의 위치를 기준으로 점수 계산
-    final screenWidth = MediaQuery.of(context).size.width;
-    final sliderStartX = (screenWidth - _sliderWidth) / 2;
-    final sliderEndX = sliderStartX + _sliderWidth;
-
-    // 드래그 위치가 슬라이더 범위 내에 있는지 확인
-    double dx = globalPosition.dx.clamp(sliderStartX, sliderEndX);
-
-    // 슬라이더 내에서의 상대적 위치 계산 (0.0 ~ 1.0)
-    double relativePosition = (dx - sliderStartX) / _sliderWidth;
-
-    // 5개 점수로 변환 (1~5)
-    int score = (relativePosition * 5).floor() + 1;
-    score = score.clamp(1, 5);
-
-    if (_sliderScore != score) {
-      setState(() {
-        _sliderScore = score;
-      });
-    }
   }
 
   @override
@@ -158,34 +151,15 @@ class _HomeViewState extends State<_HomeView> {
           children: [
             // --- 기본 UI ---
             Positioned.fill(
-              child: SafeArea(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: RecentRecordsSection(
-                          records: state.recentRecords,
-                          shouldScrollToTop: _shouldScrollToTop,
-                          onDidScrollToTop: () {
-                            setState(() {
-                              _shouldScrollToTop = false;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      const Divider(indent: 32, endIndent: 32),
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                        child: _buildQuoteOfTheDay(),
-                      ),
-                      SizedBox(height: 96 + bottomPadding), // FAB와 하단 여백 공간
-                    ],
-                  ),
-                ),
+              child: HomeContent(
+                recentRecords: state.recentRecords,
+                dailyQuote: _dailyQuote,
+                shouldScrollToTop: _shouldScrollToTop,
+                onDidScrollToTop: () {
+                  setState(() {
+                    _shouldScrollToTop = false;
+                  });
+                },
               ),
             ),
 
@@ -195,18 +169,13 @@ class _HomeViewState extends State<_HomeView> {
               bottom: 32 + bottomPadding, // 하단 패딩 적용
               left: 0,
               right: 0,
-              child: Opacity(
-                opacity: _isDragging ? 0.0 : 1.0,
-                child: GestureDetector(
-                  onTapDown: (details) =>
-                      _handleDragStart(details.globalPosition),
-                  onTapUp: (details) => _handleDragEnd(),
-                  onPanUpdate: (details) =>
-                      _handleDragUpdate(details.globalPosition),
-                  onPanEnd: (details) => _handleDragEnd(),
-                  dragStartBehavior: DragStartBehavior.down,
-                  child: _buildFAB(context, state),
-                ),
+              child: DraggableFAB(
+                selectedScore: _sliderScore,
+                isDragging: _isDragging,
+                fabKey: _fabKey,
+                onDragStart: _handleDragStart,
+                onDragUpdate: _handleDragUpdate,
+                onDragEnd: _handleDragEnd,
               ),
             ),
 
@@ -226,42 +195,6 @@ class _HomeViewState extends State<_HomeView> {
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuoteOfTheDay() {
-    return Column(
-      children: [
-        Text(
-          '“${_dailyQuote['quote']!}”',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15,
-            fontStyle: FontStyle.italic,
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '- ${_dailyQuote['author']!} -',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFAB(BuildContext context, HomeState state) {
-    // 이제 GestureDetector는 필요 없음
-    return SizedBox(
-      key: _fabKey,
-      child: AnimatedScoreButton(
-        selectedScore: _isDragging ? _sliderScore : null,
       ),
     );
   }

@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happyinside/features/sleep_record/domain/models/sleep_record.dart';
 import 'package:happyinside/features/sleep_record/presentation/controller/sleep_home_controller.dart';
 import 'package:happyinside/features/sleep_record/presentation/sleep_record_page.dart';
-import 'package:happyinside/features/sleep_record/presentation/widgets/sleep_history_chart.dart';
 import 'package:happyinside/features/sleep_record/presentation/home/widgets/sleep_animated_button.dart';
+import 'package:happyinside/features/sleep_record/presentation/home/widgets/sleep_drag_handler.dart';
+import 'package:happyinside/features/sleep_record/presentation/home/widgets/sleep_home_content.dart';
 
 class SleepHomePage extends ConsumerStatefulWidget {
   const SleepHomePage({Key? key}) : super(key: key);
@@ -19,6 +20,20 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
   String? _selectedMode; // 'night' 또는 'morning'
   bool _isDragging = false;
   final GlobalKey _buttonKey = GlobalKey();
+  late final SleepDragHandler _dragHandler;
+
+  @override
+  void initState() {
+    super.initState();
+    _dragHandler = SleepDragHandler(
+      onModeChanged: (mode) {
+        setState(() {
+          _selectedMode = mode;
+        });
+      },
+      buttonKey: _buttonKey,
+    );
+  }
 
   void _handleDragStart(Offset startPosition) {
     final buttonRenderBox =
@@ -33,13 +48,13 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
       setState(() {
         _isDragging = true;
       });
-      _updateModeFromPosition(startPosition);
+      _dragHandler.handleDragStart(startPosition);
     }
   }
 
   void _handleDragUpdate(Offset currentPosition) {
     if (!_isDragging) return;
-    _updateModeFromPosition(currentPosition);
+    _dragHandler.handleDragUpdate(currentPosition);
   }
 
   void _handleDragEnd() {
@@ -216,27 +231,6 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
         });
   }
 
-  void _updateModeFromPosition(Offset globalPosition) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final centerX = screenWidth / 2;
-
-    // 화면 중앙을 기준으로 왼쪽은 밤, 오른쪽은 아침
-    String mode;
-    if (globalPosition.dx < centerX - 20) {
-      mode = 'night'; // 왼쪽 - 밤
-    } else if (globalPosition.dx > centerX + 20) {
-      mode = 'morning'; // 오른쪽 - 아침
-    } else {
-      mode = 'default'; // 중앙 - 기본
-    }
-
-    if (_selectedMode != mode) {
-      setState(() {
-        _selectedMode = mode == 'default' ? null : mode;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(sleepHomeControllerProvider);
@@ -261,28 +255,11 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
             child: SafeArea(
               child: state.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                data: (records) => SingleChildScrollView(
-                  padding: const EdgeInsets.only(
-                    top: 24,
-                    bottom: 120, // 버튼을 위한 여백
-                  ),
-                  child: Column(
-                    children: [
-                      // 차트 섹션
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: SleepHistoryChart(
-                          records: records,
-                          onBarLongPressed: (record) {
-                            _navigateToRecordPage(context, ref, record);
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      // 통계 정보
-                      if (records.isNotEmpty) _buildStatistics(records),
-                    ],
-                  ),
+                data: (records) => SleepHomeContent(
+                  records: records,
+                  onBarLongPressed: (record) {
+                    _navigateToRecordPage(context, ref, record);
+                  },
                 ),
                 error: (message) => Center(
                   child: Column(
@@ -331,52 +308,6 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatistics(List<SleepRecord> records) {
-    final totalHours = records.fold<double>(
-      0,
-      (sum, record) => sum + record.totalSleepHours,
-    );
-    final avgHours = totalHours / records.length;
-    final avgScore =
-        records.fold<double>(0, (sum, record) => sum + record.averageScore) /
-        records.length;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem('평균 수면', '${avgHours.toStringAsFixed(1)}시간'),
-          _buildStatItem('평균 점수', '${avgScore.toStringAsFixed(1)}점'),
-          _buildStatItem('기록 수', '${records.length}개'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      ],
     );
   }
 
