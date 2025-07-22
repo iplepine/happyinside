@@ -284,6 +284,31 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
           child: ListView(
             padding: const EdgeInsets.all(20.0),
             children: [
+              // 날짜 표시 추가
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    '기록 날짜',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _isUpdateMode
+                        ? _formatDate(widget.initialRecord!.sleepTime)
+                        : _formatDate(DateTime.now()),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
               _buildTimePicker(
                 label: '잠든 시간',
                 time: _sleepTime,
@@ -460,5 +485,9 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year.toString().padLeft(4, '0')}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
   }
 }
