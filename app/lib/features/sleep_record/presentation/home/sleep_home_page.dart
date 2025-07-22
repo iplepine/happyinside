@@ -22,6 +22,10 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
   final GlobalKey _buttonKey = GlobalKey();
   late final SleepDragHandler _dragHandler;
 
+  Offset? _panStartPosition;
+  bool _dragStarted = false;
+  static const double _dragThreshold = 10.0;
+
   @override
   void initState() {
     super.initState();
@@ -35,26 +39,34 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
     );
   }
 
-  void _handleDragStart(Offset startPosition) {
-    final buttonRenderBox =
-        _buttonKey.currentContext?.findRenderObject() as RenderBox?;
-    if (buttonRenderBox == null) return;
-
-    final buttonRect =
-        buttonRenderBox.localToGlobal(Offset.zero) & buttonRenderBox.size;
-
-    // 버튼 영역에서 드래그가 시작되었는지 확인
-    if (buttonRect.contains(startPosition)) {
-      setState(() {
-        _isDragging = true;
-      });
-      _dragHandler.handleDragStart(startPosition);
-    }
+  void _handlePanStart(DragStartDetails details) {
+    _panStartPosition = details.globalPosition;
+    _dragStarted = false;
   }
 
-  void _handleDragUpdate(Offset currentPosition) {
-    if (!_isDragging) return;
-    _dragHandler.handleDragUpdate(currentPosition);
+  void _handlePanUpdate(DragUpdateDetails details) {
+    if (_panStartPosition == null) return;
+    if (!_dragStarted) {
+      final distance = (details.globalPosition - _panStartPosition!).distance;
+      if (distance > _dragThreshold) {
+        setState(() {
+          _isDragging = true;
+        });
+        _dragStarted = true;
+        _dragHandler.handleDragStart(_panStartPosition!);
+      } else {
+        return;
+      }
+    }
+    _dragHandler.handleDragUpdate(details.globalPosition);
+  }
+
+  void _handlePanEnd(DragEndDetails details) {
+    if (_dragStarted) {
+      _handleDragEnd();
+    }
+    _panStartPosition = null;
+    _dragStarted = false;
   }
 
   void _handleDragEnd() {
@@ -292,12 +304,9 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
             right: 0,
             child: Center(
               child: GestureDetector(
-                onTapDown: (details) =>
-                    _handleDragStart(details.globalPosition),
-                onTapUp: (details) => _handleDragEnd(),
-                onPanUpdate: (details) =>
-                    _handleDragUpdate(details.globalPosition),
-                onPanEnd: (details) => _handleDragEnd(),
+                onPanStart: _handlePanStart,
+                onPanUpdate: _handlePanUpdate,
+                onPanEnd: _handlePanEnd,
                 dragStartBehavior: DragStartBehavior.down,
                 child: SizedBox(
                   key: _buttonKey,
