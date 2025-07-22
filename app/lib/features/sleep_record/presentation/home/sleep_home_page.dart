@@ -301,7 +301,11 @@ class _SleepHomePageState extends ConsumerState<SleepHomePage> {
                 dragStartBehavior: DragStartBehavior.down,
                 child: SizedBox(
                   key: _buttonKey,
-                  child: SleepAnimatedButton(selectedMode: _selectedMode),
+                  width: 180, // 터치 영역 넓힘
+                  height: 180, // 터치 영역 넓힘
+                  child: Center(
+                    child: SleepAnimatedButton(selectedMode: _selectedMode),
+                  ),
                 ),
               ),
             ),

@@ -111,10 +111,6 @@ class SleepAnimatedButton extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    '드래그하여 선택하세요',
-                    style: TextStyle(color: Colors.white70, fontSize: 11),
-                  ),
                 ],
               ),
             ),

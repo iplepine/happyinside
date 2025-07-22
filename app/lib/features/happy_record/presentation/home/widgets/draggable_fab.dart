@@ -33,8 +33,12 @@ class DraggableFAB extends StatelessWidget {
         dragStartBehavior: DragStartBehavior.down,
         child: SizedBox(
           key: fabKey,
-          child: AnimatedScoreButton(
-            selectedScore: isDragging ? selectedScore : null,
+          width: 80, // 터치 영역 넓힘
+          height: 80, // 터치 영역 넓힘
+          child: Center(
+            child: AnimatedScoreButton(
+              selectedScore: isDragging ? selectedScore : null,
+            ),
           ),
         ),
       ),
