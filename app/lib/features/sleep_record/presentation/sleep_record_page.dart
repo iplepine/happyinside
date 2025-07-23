@@ -30,10 +30,15 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
 
   bool get _isUpdateMode => widget.initialRecord != null;
   bool _canEditFatigue = false;
+  late final bool _isNightMode;
 
   @override
   void initState() {
     super.initState();
+    // 진입 시점에 night 모드 여부를 한 번만 결정
+    _isNightMode =
+        widget.initialRecord != null &&
+        widget.initialRecord!.sleepTime == widget.initialRecord!.wakeTime;
     if (_isUpdateMode) {
       final record = widget.initialRecord!;
       _sleepTime = TimeOfDay.fromDateTime(record.sleepTime);
@@ -269,7 +274,9 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isUpdateMode ? '수면 기록 편집' : '수면 기록하기'),
+        title: Text(
+          _isNightMode ? '잠든 시간 기록' : (_isUpdateMode ? '수면 기록 편집' : '수면 기록하기'),
+        ),
         actions: [
           if (_isUpdateMode)
             IconButton(
@@ -309,28 +316,39 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                   const SizedBox(height: 20),
                 ],
               ),
+              // 잠든 시간만 수정 가능
               _buildTimePicker(
                 label: '잠든 시간',
                 time: _sleepTime,
-                onTap: () => _selectTime(context, isSleepTime: true),
+                onTap: _isNightMode
+                    ? () => _selectTime(context, isSleepTime: true)
+                    : () => _selectTime(context, isSleepTime: true),
               ),
               const SizedBox(height: 16),
-              _buildTimePicker(
-                label: '일어난 시간',
-                time: _wakeTime,
-                onTap: () => _selectTime(context, isSleepTime: false),
-              ),
+              // 나머지는 모두 비활성화
+              _buildTimePicker(label: '일어난 시간', time: _wakeTime, onTap: null),
+              if (_isNightMode)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Text(
+                    '잠든 시간 기록 모드에서는 잠든 시간만 입력할 수 있습니다.',
+                    style: TextStyle(color: Colors.red, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               const SizedBox(height: 24),
               _buildSlider(
                 label: '잠에서 깼을 때의 상쾌함',
                 value: _freshness,
                 onChanged: (v) => setState(() => _freshness = v),
+                enabled: !_isNightMode,
               ),
               const SizedBox(height: 24),
               _buildSlider(
                 label: '수면 만족도',
                 value: _sleepSatisfaction,
                 onChanged: (v) => setState(() => _sleepSatisfaction = v),
+                enabled: !_isNightMode,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -341,38 +359,21 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
+                enabled: !_isNightMode,
               ),
               const SizedBox(height: 24),
               _buildSlider(
                 label: '하루 중 피로도',
                 value: _fatigue,
-                enabled: _isUpdateMode && _canEditFatigue,
+                enabled: _isUpdateMode && _canEditFatigue && !_isNightMode,
                 onChanged: (v) => setState(() => _fatigue = v),
               ),
               const SizedBox(height: 16),
               GestureDetector(
-                onTap: () {
-                  if (!_isUpdateMode) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          '피로도는 오후에 기록할 수 있습니다. 먼저 아침 수면 기록을 저장해주세요.',
-                        ),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  } else if (!_canEditFatigue) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('피로도는 기상 후 1시간 뒤부터 기록할 수 있습니다.'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
+                onTap: null,
                 child: TextFormField(
                   controller: _contentController,
-                  enabled: _isUpdateMode && _canEditFatigue,
+                  enabled: _isUpdateMode && _canEditFatigue && !_isNightMode,
                   decoration: const InputDecoration(
                     labelText: '피로도 관련 기록',
                     hintText: '예: 오후에 집중력 저하, 특정 스트레스 이벤트 등',
@@ -381,15 +382,19 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
                   maxLines: 3,
                 ),
               ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: _onSave,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: const Text('저장'),
-              ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ElevatedButton(
+            onPressed: _onSave,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('저장'),
           ),
         ),
       ),
@@ -399,7 +404,7 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
   Widget _buildTimePicker({
     required String label,
     required TimeOfDay time,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
   }) {
     return InkWell(
       onTap: onTap,
@@ -417,13 +422,11 @@ class _SleepRecordPageState extends State<SleepRecordPage> {
             ),
             const Spacer(),
             Text(
-              (time.hour == 0 && time.minute == 0) ||
-                      (label == '일어난 시간' &&
-                          widget.initialRecord != null &&
-                          widget.initialRecord!.sleepTime ==
-                              widget.initialRecord!.wakeTime)
-                  ? '시간 선택'
-                  : time.format(context),
+              label == '일어난 시간' && _isNightMode
+                  ? '기상 후 입력'
+                  : ((time.hour == 0 && time.minute == 0)
+                        ? '시간 선택'
+                        : time.format(context)),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 8),
