@@ -39,6 +39,13 @@ class _MainHomePageState extends ConsumerState<MainHomePage> {
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
+                      context.push('/dashboard');
+                    },
+                    child: const Text('Home Dashboard'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
                       context.push('/happy');
                     },
                     child: const Text('Happy Record'),
