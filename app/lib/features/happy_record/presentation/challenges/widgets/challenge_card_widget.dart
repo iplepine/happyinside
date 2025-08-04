@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../domain/models/challenge_progress.dart';
 
 class ChallengeCardWidget extends StatelessWidget {
@@ -15,9 +16,11 @@ class ChallengeCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final progressPercentage = (challenge.progress * 100).round();
-    
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        context.push('/challenge-detail', extra: challenge);
+      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -40,11 +43,7 @@ class ChallengeCardWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.flag,
-                  color: theme.colorScheme.primary,
-                  size: 20,
-                ),
+                Icon(Icons.flag, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -55,7 +54,10 @@ class ChallengeCardWidget extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -81,16 +83,14 @@ class ChallengeCardWidget extends StatelessWidget {
             LinearProgressIndicator(
               value: challenge.progress,
               backgroundColor: theme.colorScheme.surfaceVariant,
-              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(
-                  Icons.today,
-                  size: 16,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.today, size: 16, color: theme.colorScheme.primary),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -113,4 +113,4 @@ class ChallengeCardWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}

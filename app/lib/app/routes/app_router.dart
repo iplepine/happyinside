@@ -4,6 +4,9 @@ import '../../features/main/presentation/main_tab_page.dart';
 import '../../features/happy_record/presentation/write/write_page.dart';
 import '../../features/happy_record/presentation/home/happy_home_page.dart';
 import '../../features/happy_record/presentation/dashboard/home_dashboard_page.dart';
+import '../../features/happy_record/presentation/challenges/challenge_detail_page.dart';
+import '../../features/happy_record/presentation/challenges/challenge_explore_page.dart';
+import '../../features/happy_record/domain/models/challenge_progress.dart';
 import '../../features/sleep_record/domain/models/sleep_record.dart';
 import '../../features/sleep_record/presentation/home/sleep_home_page.dart';
 import '../../features/sleep_record/presentation/sleep_record_page.dart';
@@ -23,6 +26,17 @@ class AppRouter {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const HomeDashboardPage(),
+      ),
+      GoRoute(
+        path: '/challenge-detail',
+        builder: (context, state) {
+          final challenge = state.extra as ChallengeProgress;
+          return ChallengeDetailPage(challenge: challenge);
+        },
+      ),
+      GoRoute(
+        path: '/challenge-explore',
+        builder: (context, state) => const ChallengeExplorePage(),
       ),
       GoRoute(
         path: '/sleep',

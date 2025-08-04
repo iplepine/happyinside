@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../domain/models/challenge_progress.dart';
 
 class ChallengeCardListWidget extends StatelessWidget {
@@ -14,7 +15,7 @@ class ChallengeCardListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     if (challenges.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -92,11 +93,18 @@ class ChallengeCardListWidget extends StatelessWidget {
               return Container(
                 width: 280,
                 margin: EdgeInsets.only(
-                  right: index < (challenges.length > 3 ? 2 : challenges.length - 1) 
-                      ? 12 
+                  right:
+                      index <
+                          (challenges.length > 3 ? 2 : challenges.length - 1)
+                      ? 12
                       : 0,
                 ),
-                child: _ChallengeCard(challenge: challenge),
+                child: _ChallengeCard(
+                  challenge: challenge,
+                  onTap: () {
+                    context.push('/challenge-detail', extra: challenge);
+                  },
+                ),
               );
             },
           ),
@@ -108,80 +116,82 @@ class ChallengeCardListWidget extends StatelessWidget {
 
 class _ChallengeCard extends StatelessWidget {
   final ChallengeProgress challenge;
+  final VoidCallback? onTap;
 
-  const _ChallengeCard({required this.challenge});
+  const _ChallengeCard({required this.challenge, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-          width: 1,
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.2),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.shadow.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.flag,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  challenge.title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.flag, size: 20, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    challenge.title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              challenge.description,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            challenge.description,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 12),
-          LinearProgressIndicator(
-            value: challenge.progress,
-            backgroundColor: theme.colorScheme.surfaceVariant,
-            valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '오늘: ${challenge.todayTask}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 12),
+            LinearProgressIndicator(
+              value: challenge.progress,
+              backgroundColor: theme.colorScheme.surfaceVariant,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary,
+              ),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              '오늘: ${challenge.todayTask}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
-} 
+}

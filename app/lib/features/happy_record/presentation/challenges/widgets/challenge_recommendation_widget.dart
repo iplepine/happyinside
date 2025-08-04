@@ -1,45 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../domain/models/challenge_progress.dart';
+import '../../../domain/usecases/get_available_challenges_usecase.dart';
 
 class ChallengeRecommendationWidget extends StatelessWidget {
   final Function(ChallengeProgress) onChallengeTap;
+  final VoidCallback? onMoreTap;
 
   const ChallengeRecommendationWidget({
     super.key,
     required this.onChallengeTap,
+    this.onMoreTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    // Dummy 추천 챌린지들
-    final recommendedChallenges = [
+    // 현재 진행 중인 챌린지 목록 (dummy data)
+    final activeChallenges = [
       ChallengeProgress(
-        id: 'rec1',
-        title: '스트레스 해소 루틴',
-        description: '매일 10분 명상으로 스트레스 관리하기',
-        progress: 0.0,
-        todayTask: '오늘 10분 명상하기',
-        startDate: DateTime.now(),
+        id: '1',
+        title: '매일 감정 기록하기',
+        description: '30일 동안 매일 감정을 기록하는 챌린지',
+        progress: 0.7,
+        todayTask: '오늘의 감정을 기록해보세요',
+        startDate: DateTime.now().subtract(const Duration(days: 21)),
       ),
       ChallengeProgress(
-        id: 'rec2',
-        title: '감사 연습',
-        description: '매일 감사한 일 3가지를 찾아보기',
-        progress: 0.0,
-        todayTask: '오늘 감사한 일 찾기',
-        startDate: DateTime.now(),
-      ),
-      ChallengeProgress(
-        id: 'rec3',
-        title: '긍정적 사고 훈련',
-        description: '부정적 상황에서 긍정적 관점 찾기',
-        progress: 0.0,
-        todayTask: '긍정적 관점 연습하기',
-        startDate: DateTime.now(),
+        id: '2',
+        title: '감사 일기 쓰기',
+        description: '매일 감사한 일 3가지를 기록하기',
+        progress: 0.4,
+        todayTask: '오늘 감사한 일을 찾아보세요',
+        startDate: DateTime.now().subtract(const Duration(days: 12)),
       ),
     ];
+    
+    // UseCase를 사용하여 추천 챌린지 가져오기
+    final getAvailableChallengesUseCase = GetAvailableChallengesUseCase();
+    final availableChallenges = getAvailableChallengesUseCase(activeChallenges);
+    
+    // 상위 3개만 추천으로 표시
+    final recommendedChallenges = availableChallenges.take(3).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,11 +59,9 @@ class ChallengeRecommendationWidget extends StatelessWidget {
                 ),
               ),
               TextButton(
-                onPressed: () {
+                onPressed: onMoreTap ?? () {
                   // 전체 챌린지 목록으로 이동
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('전체 챌린지 목록으로 이동합니다')),
-                  );
+                  context.push('/challenge-explore');
                 },
                 child: Text(
                   '더보기',
@@ -88,7 +89,18 @@ class ChallengeRecommendationWidget extends StatelessWidget {
                 ),
                 child: _RecommendedChallengeCard(
                   challenge: challenge,
-                  onTap: () => onChallengeTap(challenge),
+                  onTap: () {
+                    // ChallengeExploreItem을 ChallengeProgress로 변환
+                    final challengeProgress = ChallengeProgress(
+                      id: challenge.id,
+                      title: challenge.title,
+                      description: challenge.description,
+                      progress: 0.0,
+                      todayTask: '새로운 챌린지를 시작해보세요',
+                      startDate: DateTime.now(),
+                    );
+                    onChallengeTap(challengeProgress);
+                  },
                 ),
               );
             },
@@ -100,7 +112,7 @@ class ChallengeRecommendationWidget extends StatelessWidget {
 }
 
 class _RecommendedChallengeCard extends StatelessWidget {
-  final ChallengeProgress challenge;
+  final ChallengeExploreItem challenge;
   final VoidCallback onTap;
 
   const _RecommendedChallengeCard({
@@ -193,4 +205,4 @@ class _RecommendedChallengeCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

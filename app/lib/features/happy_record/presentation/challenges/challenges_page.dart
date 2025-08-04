@@ -59,6 +59,10 @@ class _ChallengesPageState extends State<ChallengesPage> {
     context.push('/challenge-explore');
   }
 
+  void _onMoreChallenges() {
+    context.push('/challenge-explore');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,21 +87,20 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     challenges: _activeChallenges,
                     onChallengeTap: _onChallengeTap,
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // 새로운 챌린지 추천
                   ChallengeRecommendationWidget(
                     onChallengeTap: _onChallengeTap,
+                    onMoreTap: _onMoreChallenges,
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 챌린지 시작하기 버튼
-                  StartNewChallengeButton(
-                    onTap: _onStartNewChallenge,
-                  ),
-                  
+                  StartNewChallengeButton(onTap: _onStartNewChallenge),
+
                   const SizedBox(height: 100),
                 ],
               ),
@@ -107,4 +110,4 @@ class _ChallengesPageState extends State<ChallengesPage> {
       ),
     );
   }
-} 
+}
