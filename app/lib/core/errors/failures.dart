@@ -1,4 +1,4 @@
-import 'package:happyinside/features/sleep_record/domain/models/sleep_record.dart';
+import 'package:zestinme/features/sleep_record/domain/models/sleep_record.dart';
 import 'package:intl/intl.dart';
 
 /// 앱 전체에서 사용하는 에러 타입들

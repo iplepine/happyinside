@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:happyinside/core/models/record.dart';
+import 'package:zestinme/core/models/record.dart';
 
 import 'recent_records_section.dart';
 import 'quote_of_the_day.dart';

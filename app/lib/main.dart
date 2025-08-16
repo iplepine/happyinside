@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:happyinside/app/app.dart';
-import 'package:happyinside/di/injection.dart';
+import 'package:zestinme/app/app.dart';
+import 'package:zestinme/di/injection.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {

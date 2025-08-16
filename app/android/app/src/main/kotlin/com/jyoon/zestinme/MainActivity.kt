@@ -1,4 +1,4 @@
-package com.jyoon.happyinside
+package com.jyoon.zestinme
 
 import io.flutter.embedding.android.FlutterActivity
 import androidx.core.view.WindowCompat

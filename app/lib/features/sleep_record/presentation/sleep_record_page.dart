@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:happyinside/core/errors/failures.dart';
+import 'package:zestinme/core/errors/failures.dart';
 
 import '../../../di/injection.dart';
 import '../domain/models/sleep_record.dart';

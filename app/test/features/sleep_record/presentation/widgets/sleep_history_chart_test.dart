@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happyinside/features/sleep_record/domain/models/sleep_record.dart';
-import 'package:happyinside/features/sleep_record/presentation/widgets/sleep_history_chart.dart';
+import 'package:zestinme/features/sleep_record/domain/models/sleep_record.dart';
+import 'package:zestinme/features/sleep_record/presentation/widgets/sleep_history_chart.dart';
 
 void main() {
   group('SleepHistoryChart', () {

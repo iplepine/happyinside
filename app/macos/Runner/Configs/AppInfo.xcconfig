@@ -9,7 +9,7 @@ PRODUCT_NAME = app
 
 // The bundle identifier of your application.
 // This is used as CFBundleIdentifier in the Info.plist file.
-PRODUCT_BUNDLE_IDENTIFIER = com.jyoon.happyinside
+PRODUCT_BUNDLE_IDENTIFIER = com.jyoon.zestinme
 
 // The copyright of your application.
 // This is used as NSHumanReadableCopyright in the Info.plist file.

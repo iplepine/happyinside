@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happyinside/di/injection.dart';
+import 'package:zestinme/di/injection.dart';
 import '../../domain/usecases/get_sleep_records_usecase.dart';
 import '../state/sleep_home_state.dart';
 

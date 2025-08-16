@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
     return ProviderScope(
       child: MaterialApp.router(
         routerConfig: AppRouter.router,
-        title: 'HappyInside',
+        title: 'ZestInMe',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
       ),
