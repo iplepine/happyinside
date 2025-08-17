@@ -1,17 +1,12 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zestinme/shared/services/quote_service.dart';
 
 import 'controllers/home_controller.dart';
 import 'intent/home_intent.dart';
-import 'state/home_state.dart';
-import 'widgets/animated_score_button.dart';
 import 'widgets/draggable_fab.dart';
 import 'widgets/drag_gesture_handler.dart';
 import 'widgets/home_content.dart';
-import 'widgets/quote_of_the_day.dart';
-import 'widgets/recent_records_section.dart';
 import 'widgets/score_slider.dart';
 
 class HappyHomePage extends StatelessWidget {
