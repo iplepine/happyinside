@@ -1,43 +1,121 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/providers/session_provider.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoggedIn = ref.watch(isLoggedInProvider);
+    final userName = ref.watch(userNameProvider);
+
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: AppColors.muted,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               floating: true,
-              title: const Text(
-                'Settings',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              title: Text(
+                '설정',
+                style: TextStyle(
+                  fontWeight: AppColors.fontWeightMedium,
+                  color: AppColors.foreground,
+                ),
               ),
-              backgroundColor: theme.colorScheme.background,
+              backgroundColor: AppColors.muted,
+              surfaceTintColor: Colors.transparent,
             ),
             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  
-                  // 계정 설정
+
+                  // 로그인 상태 표시
+                  if (isLoggedIn)
+                    _SettingsSection(
+                      title: '계정',
+                      items: [
+                        _SettingsItem(
+                          icon: Icons.person,
+                          title: '프로필 설정',
+                          subtitle: '${userName ?? '사용자'}님의 프로필',
+                          onTap: () {
+                            // 프로필 설정 페이지로 이동
+                          },
+                        ),
+                        _SettingsItem(
+                          icon: Icons.logout,
+                          title: '로그아웃',
+                          subtitle: '계정에서 로그아웃',
+                          onTap: () async {
+                            // 로그아웃 확인 다이얼로그
+                            final shouldLogout = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('로그아웃'),
+                                content: const Text('정말 로그아웃하시겠습니까?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: const Text('취소'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.destructive,
+                                    ),
+                                    child: const Text('로그아웃'),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (shouldLogout == true) {
+                              await ref.read(sessionProvider).logout();
+                              if (context.mounted) {
+                                context.go('/');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('로그아웃되었습니다.'),
+                                    backgroundColor: AppColors.accent,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          isDestructive: true,
+                        ),
+                      ],
+                    )
+                  else
+                    _SettingsSection(
+                      title: '계정',
+                      items: [
+                        _SettingsItem(
+                          icon: Icons.login,
+                          title: '로그인',
+                          subtitle: '계정에 로그인',
+                          onTap: () {
+                            context.push('/login');
+                          },
+                        ),
+                      ],
+                    ),
+
+                  const SizedBox(height: 32),
+
+                  // 알림 설정
                   _SettingsSection(
-                    title: '계정',
+                    title: '알림',
                     items: [
-                      _SettingsItem(
-                        icon: Icons.person,
-                        title: '프로필 설정',
-                        subtitle: '이름, 프로필 사진 변경',
-                        onTap: () {
-                          // 프로필 설정 페이지로 이동
-                        },
-                      ),
                       _SettingsItem(
                         icon: Icons.notifications,
                         title: '알림 설정',
@@ -48,9 +126,9 @@ class SettingsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // 데이터 관리
                   _SettingsSection(
                     title: '데이터',
@@ -74,9 +152,9 @@ class SettingsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // 앱 정보
                   _SettingsSection(
                     title: '앱 정보',
@@ -107,9 +185,9 @@ class SettingsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // 지원
                   _SettingsSection(
                     title: '지원',
@@ -132,7 +210,7 @@ class SettingsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 100),
                 ],
               ),
@@ -148,15 +226,10 @@ class _SettingsSection extends StatelessWidget {
   final String title;
   final List<_SettingsItem> items;
 
-  const _SettingsSection({
-    required this.title,
-    required this.items,
-  });
+  const _SettingsSection({required this.title, required this.items});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -164,9 +237,9 @@ class _SettingsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: AppColors.fontWeightMedium,
+              color: AppColors.primary,
             ),
           ),
         ),
@@ -174,16 +247,11 @@ class _SettingsSection extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.2),
-              width: 1,
-            ),
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(AppColors.radius),
+            border: Border.all(color: AppColors.secondary, width: 1),
           ),
-          child: Column(
-            children: items.map((item) => item).toList(),
-          ),
+          child: Column(children: items.map((item) => item).toList()),
         ),
       ],
     );
@@ -207,32 +275,30 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return ListTile(
       leading: Icon(
         icon,
-        color: isDestructive ? Colors.red : theme.colorScheme.primary,
+        color: isDestructive ? AppColors.destructive : AppColors.primary,
       ),
       title: Text(
         title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-          color: isDestructive ? Colors.red : null,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontWeight: AppColors.fontWeightMedium,
+          color: isDestructive ? AppColors.destructive : AppColors.foreground,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground),
       ),
       trailing: Icon(
         Icons.arrow_forward_ios,
         size: 16,
-        color: theme.colorScheme.onSurface.withOpacity(0.5),
+        color: AppColors.mutedForeground,
       ),
       onTap: onTap,
     );
   }
-} 
+}

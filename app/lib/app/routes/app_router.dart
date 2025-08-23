@@ -1,9 +1,8 @@
 import 'package:go_router/go_router.dart';
-import '../../features/main/presentation/main_home_page.dart';
-import '../../features/main/presentation/main_tab_page.dart';
+import '../../features/main/presentation/main_screen.dart';
+import '../../features/auth/presentation/login_page.dart';
 import '../../features/happy_record/presentation/write/write_page.dart';
 import '../../features/happy_record/presentation/home/happy_home_page.dart';
-import '../../features/happy_record/presentation/dashboard/home_dashboard_page.dart';
 import '../../features/happy_record/presentation/challenges/challenge_detail_page.dart';
 import '../../features/happy_record/presentation/challenges/challenge_explore_page.dart';
 import '../../features/happy_record/domain/models/challenge_progress.dart';
@@ -17,15 +16,15 @@ class AppRouter {
   static final router = GoRouter(
     initialLocation: '/',
     routes: [
-      GoRoute(path: '/', builder: (context, state) => const MainTabPage()),
-      GoRoute(path: '/old-home', builder: (context, state) => const MainHomePage()),
+      GoRoute(path: '/', builder: (context, state) => const MainScreen()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: '/old-home',
+        builder: (context, state) => const MainScreen(),
+      ),
       GoRoute(
         path: '/happy',
         builder: (context, state) => const HappyHomePage(),
-      ),
-      GoRoute(
-        path: '/dashboard',
-        builder: (context, state) => const HomeDashboardPage(),
       ),
       GoRoute(
         path: '/challenge-detail',

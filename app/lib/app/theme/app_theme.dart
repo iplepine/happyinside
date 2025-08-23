@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// ZestInMe 앱 테마 - 레몬(활력) + 라임(안정) 색상 팔레트
 class AppTheme {
   // 라이트 모드 색상
-  static const _primary = Color(0xFFFFD300); // 레몬 - CTA/하이라이트
+  static const _primary = Color(0xFFffe135); // 레몬 - CTA/하이라이트
   static const _primaryContainer = Color(0xFFFFF4B8); // 연한 레몬
   static const _secondary = Color(0xFF6CCB2C); // 라임 - 성공/안정
   static const _secondaryContainer = Color(0xFFEAF6D8); // 연한 라임
