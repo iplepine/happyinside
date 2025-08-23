@@ -27,48 +27,66 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: Colors.grey.shade200, width: 0.5),
+          ),
+        ),
+        child: SafeArea(
+          child: Container(
+            height: 60,
+            child: Row(
+              children: [
+                _buildNavItem(0, Icons.home_outlined, 'Home'),
+                _buildNavItem(1, Icons.bar_chart_outlined, 'Insights'),
+                _buildNavItem(2, Icons.emoji_events_outlined, 'Challenges'),
+                _buildNavItem(3, Icons.settings_outlined, 'Settings'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _currentIndex == index;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
           setState(() {
             _currentIndex = index;
           });
         },
-        backgroundColor: AppColors.card,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.mutedForeground,
-        selectedLabelStyle: const TextStyle(
-          fontWeight: AppColors.fontWeightMedium,
-          fontSize: 12,
+        child: Container(
+          height: 60,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 22,
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.mutedForeground,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: AppColors.fontWeightMedium,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.mutedForeground,
+                ),
+              ),
+            ],
+          ),
         ),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: AppColors.fontWeightMedium,
-          fontSize: 12,
-        ),
-        elevation: 8,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart_outlined),
-            label: 'Insights',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            activeIcon: Icon(Icons.emoji_events_outlined),
-            label: 'Challenges',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_outlined),
-            label: 'Settings',
-          ),
-        ],
       ),
     );
   }

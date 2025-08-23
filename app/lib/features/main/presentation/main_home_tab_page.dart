@@ -132,7 +132,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           foregroundColor: AppColors.primaryForeground,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -221,10 +221,14 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
               margin: EdgeInsets.only(right: index < tabs.length - 1 ? 8 : 0),
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.grey.shade50,
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.grey.shade200,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.primary.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -236,7 +240,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
                     size: 16,
                     color: isSelected
                         ? AppColors.primaryForeground
-                        : AppColors.mutedForeground,
+                        : AppColors.foreground,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -245,7 +249,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
                       fontWeight: AppColors.fontWeightMedium,
                       color: isSelected
                           ? AppColors.primaryForeground
-                          : AppColors.mutedForeground,
+                          : AppColors.foreground,
                     ),
                   ),
                 ],
@@ -262,20 +266,20 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
       {
         'label': '총 기록',
         'count': '0',
-        'color': AppColors.secondary,
-        'textColor': AppColors.secondaryForeground,
+        'color': AppColors.primary.withOpacity(0.05),
+        'textColor': AppColors.mutedForeground,
       },
       {
         'label': '좋은 기록',
         'count': '0',
-        'color': AppColors.accent,
-        'textColor': AppColors.accentForeground,
+        'color': AppColors.primary.withOpacity(0.05),
+        'textColor': AppColors.mutedForeground,
       },
       {
         'label': '힘든 기록',
         'count': '0',
-        'color': AppColors.secondary,
-        'textColor': AppColors.secondaryForeground,
+        'color': AppColors.primary.withOpacity(0.05),
+        'textColor': AppColors.mutedForeground,
       },
     ];
 
@@ -284,17 +288,16 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
         return Expanded(
           child: Container(
             margin: EdgeInsets.only(right: stat == stats.last ? 0 : 8),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
             decoration: BoxDecoration(
               color: stat['color'] as Color,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade200, width: 1),
+              borderRadius: BorderRadius.circular(6),
             ),
             child: Column(
               children: [
                 Text(
                   stat['count'] as String,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: AppColors.fontWeightMedium,
                     color: stat['textColor'] as Color,
                   ),
@@ -305,6 +308,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.mutedForeground,
                     fontWeight: AppColors.fontWeightMedium,
+                    fontSize: 11,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -361,32 +365,33 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
 
   Widget _buildSecondaryActionLink() {
     return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300, width: 1),
+      child: TextButton(
+        onPressed: () {
+          // 힘든 일 기록하기 페이지로 이동
+          context.push('/difficult');
+        },
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.mutedForeground,
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          backgroundColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
-        child: TextButton.icon(
-          onPressed: () {
-            // 힘든 일 기록하기 페이지로 이동
-            context.push('/difficult');
-          },
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.foreground,
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('😔', style: TextStyle(fontSize: 14)),
+            const SizedBox(width: 4),
+            Text(
+              '힘든 일 기록하기',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.mutedForeground,
+                fontWeight: AppColors.fontWeightNormal,
+                decoration: TextDecoration.underline,
+                decorationThickness: 1.5,
+                decorationColor: AppColors.mutedForeground,
+              ),
             ),
-          ),
-          icon: const Text('😔', style: TextStyle(fontSize: 16)),
-          label: Text(
-            '힘든 일 기록하기',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.foreground,
-              fontWeight: AppColors.fontWeightMedium,
-            ),
-          ),
+          ],
         ),
       ),
     );
