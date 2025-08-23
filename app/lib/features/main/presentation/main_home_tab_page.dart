@@ -86,7 +86,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
           ),
         ),
 
-        // 오른쪽 배지
+        // 오른쪽 영역
         if (isLoggedIn)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -108,6 +108,33 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
                   '7일',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.primaryForeground,
+                    fontWeight: AppColors.fontWeightMedium,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          TextButton(
+            onPressed: () {
+              context.push('/login');
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              backgroundColor: AppColors.primary.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.login, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  '로그인',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: AppColors.fontWeightMedium,
                   ),
                 ),
