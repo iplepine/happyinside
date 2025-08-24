@@ -77,7 +77,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                '오늘도 상큼한 하루 되세요',
+                isLoggedIn ? '오늘도 상큼한 하루 되세요' : '로그인하고 더 많은 기능을 사용해보세요',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.mutedForeground,
                 ),
@@ -117,7 +117,17 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
         else
           TextButton(
             onPressed: () {
-              context.push('/login');
+              try {
+                context.push('/login');
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('로그인 페이지를 불러올 수 없습니다.'),
+                    backgroundColor: AppColors.destructive,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
             },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
@@ -154,7 +164,17 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
       ),
       child: ElevatedButton(
         onPressed: () {
-          context.push('/happy');
+          try {
+            context.push('/write');
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('페이지를 불러올 수 없습니다.'),
+                backgroundColor: AppColors.destructive,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
@@ -172,7 +192,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
             const Text('😊', style: TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
             Text(
-              '오늘의 감정 기록하기',
+              '감정 기록하기',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: AppColors.fontWeightMedium,
                 color: AppColors.primaryForeground,
@@ -381,7 +401,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
         const SizedBox(height: 4),
 
         Text(
-          '오늘 첫 기록을 남겨보세요!',
+          '첫 기록을 남겨보세요!',
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: AppColors.mutedForeground),
@@ -394,8 +414,17 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
     return Center(
       child: TextButton(
         onPressed: () {
-          // 힘든 일 기록하기 페이지로 이동
-          context.push('/difficult');
+          try {
+            context.push('/difficult');
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('페이지를 불러올 수 없습니다.'),
+                backgroundColor: AppColors.destructive,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
         },
         style: TextButton.styleFrom(
           foregroundColor: AppColors.mutedForeground,
@@ -409,7 +438,7 @@ class _MainHomeTabPageState extends ConsumerState<MainHomeTabPage> {
             const Text('😔', style: TextStyle(fontSize: 14)),
             const SizedBox(width: 4),
             Text(
-              '힘든 일 기록하기',
+              '상세 기록하기',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.mutedForeground,
                 fontWeight: AppColors.fontWeightNormal,

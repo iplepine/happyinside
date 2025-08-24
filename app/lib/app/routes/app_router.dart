@@ -59,6 +59,12 @@ class AppRouter {
           return WritePage(initialScore: score);
         },
       ),
+      GoRoute(
+        path: '/difficult',
+        builder: (context, state) {
+          return WritePage(initialScore: 3); // 낮은 점수로 시작
+        },
+      ),
     ],
   );
 }

@@ -71,16 +71,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.muted,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
 
                 // 로고 및 제목
                 Center(
@@ -90,16 +90,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(AppColors.radius),
+                          color: AppColors.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.emoji_nature,
-                          color: AppColors.primaryForeground,
+                          color: AppColors.primary,
                           size: 40,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       Text(
                         'ZestInMe',
                         style: Theme.of(context).textTheme.headlineLarge
@@ -108,7 +108,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               color: AppColors.foreground,
                             ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       Text(
                         '상큼한 하루를 기록해보세요',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -119,7 +119,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
 
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
 
                 // 이메일 입력 필드
                 TextFormField(
@@ -128,12 +128,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   decoration: InputDecoration(
                     labelText: '이메일',
                     hintText: 'example@email.com',
-                    prefixIcon: const Icon(Icons.email_outlined),
+                    prefixIcon: Icon(
+                      Icons.email_outlined,
+                      color: AppColors.mutedForeground,
+                    ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppColors.radius),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
-                    fillColor: AppColors.card,
+                    fillColor: Colors.grey.shade50,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -148,7 +163,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   },
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // 비밀번호 입력 필드
                 TextFormField(
@@ -157,12 +172,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   decoration: InputDecoration(
                     labelText: '비밀번호',
                     hintText: '비밀번호를 입력하세요',
-                    prefixIcon: const Icon(Icons.lock_outlined),
+                    prefixIcon: Icon(
+                      Icons.lock_outlined,
+                      color: AppColors.mutedForeground,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
+                        color: AppColors.mutedForeground,
                       ),
                       onPressed: () {
                         setState(() {
@@ -171,10 +190,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       },
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppColors.radius),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
-                    fillColor: AppColors.card,
+                    fillColor: Colors.grey.shade50,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -187,40 +218,49 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   },
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 24),
 
                 // 로그인 버튼
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.primaryForeground,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppColors.radius),
-                    ),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.primaryForeground,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: AppColors.primaryForeground,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primaryForeground,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            '로그인',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: AppColors.fontWeightMedium,
                             ),
                           ),
-                        )
-                      : const Text(
-                          '로그인',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: AppColors.fontWeightMedium,
-                          ),
-                        ),
+                  ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // 회원가입 링크
                 Row(
@@ -251,28 +291,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
 
                 // 테스트용 로그인 버튼
-                OutlinedButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          _emailController.text = 'test@example.com';
-                          _passwordController.text = '123456';
-                          await _handleLogin();
-                        },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.mutedForeground,
-                    side: BorderSide(color: AppColors.border),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppColors.radius),
-                    ),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300, width: 1),
                   ),
-                  child: const Text(
-                    '테스트 로그인 (test@example.com)',
-                    style: TextStyle(fontSize: 14),
+                  child: TextButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            _emailController.text = 'test@example.com';
+                            _passwordController.text = '123456';
+                            await _handleLogin();
+                          },
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.mutedForeground,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      '테스트 로그인 (test@example.com)',
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
                 ),
               ],
