@@ -13,7 +13,7 @@ class SettingsPage extends ConsumerWidget {
     final userName = ref.watch(userNameProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.muted,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -26,14 +26,14 @@ class SettingsPage extends ConsumerWidget {
                   color: AppColors.foreground,
                 ),
               ),
-              backgroundColor: AppColors.muted,
+              backgroundColor: Colors.white,
               surfaceTintColor: Colors.transparent,
             ),
             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   // 로그인 상태 표시
                   if (isLoggedIn)
@@ -110,7 +110,7 @@ class SettingsPage extends ConsumerWidget {
                       ],
                     ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // 알림 설정
                   _SettingsSection(
@@ -127,7 +127,7 @@ class SettingsPage extends ConsumerWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // 데이터 관리
                   _SettingsSection(
@@ -153,7 +153,7 @@ class SettingsPage extends ConsumerWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // 앱 정보
                   _SettingsSection(
@@ -186,7 +186,7 @@ class SettingsPage extends ConsumerWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // 지원
                   _SettingsSection(
@@ -211,7 +211,7 @@ class SettingsPage extends ConsumerWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -234,22 +234,22 @@ class _SettingsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: AppColors.fontWeightMedium,
-              color: AppColors.primary,
+              color: AppColors.foreground,
             ),
           ),
         ),
         const SizedBox(height: 8),
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(AppColors.radius),
-            border: Border.all(color: AppColors.secondary, width: 1),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200, width: 1),
           ),
           child: Column(children: items.map((item) => item).toList()),
         ),
@@ -275,30 +275,39 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isDestructive ? AppColors.destructive : AppColors.primary,
-      ),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: AppColors.fontWeightMedium,
-          color: isDestructive ? AppColors.destructive : AppColors.foreground,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade100, width: 0.5),
         ),
       ),
-      subtitle: Text(
-        subtitle,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Icon(
+          icon,
+          color: isDestructive ? AppColors.destructive : AppColors.primary,
+          size: 20,
+        ),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: AppColors.fontWeightMedium,
+            color: isDestructive ? AppColors.destructive : AppColors.foreground,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 14,
+          color: AppColors.mutedForeground,
+        ),
+        onTap: onTap,
       ),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        size: 16,
-        color: AppColors.mutedForeground,
-      ),
-      onTap: onTap,
     );
   }
 }
