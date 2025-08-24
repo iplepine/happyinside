@@ -6,17 +6,14 @@ class ChallengeHistoryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-          width: 1,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.shadow.withOpacity(0.05),
@@ -30,11 +27,7 @@ class ChallengeHistoryWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.history,
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
+              Icon(Icons.history, color: theme.colorScheme.primary, size: 24),
               const SizedBox(width: 8),
               Text(
                 '챌린지 히스토리',
@@ -45,7 +38,7 @@ class ChallengeHistoryWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // 완료된 챌린지들
           _CompletedChallengeCard(
             title: '매일 감정 기록하기',
@@ -54,9 +47,9 @@ class ChallengeHistoryWidget extends StatelessWidget {
             result: '성공',
             description: '30일 동안 꾸준히 감정을 기록했어요',
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           _CompletedChallengeCard(
             title: '감사 일기 쓰기',
             duration: '21일',
@@ -64,9 +57,9 @@ class ChallengeHistoryWidget extends StatelessWidget {
             result: '성공',
             description: '매일 감사한 일을 찾는 습관이 생겼어요',
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           _CompletedChallengeCard(
             title: '명상 습관 만들기',
             duration: '14일',
@@ -74,9 +67,9 @@ class ChallengeHistoryWidget extends StatelessWidget {
             result: '부분 성공',
             description: '14일 중 10일 성공, 스트레스 관리에 도움이 됐어요',
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Icon(
@@ -119,16 +112,16 @@ class _CompletedChallengeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isSuccess = result == '성공';
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isSuccess 
+        color: isSuccess
             ? Colors.green.withOpacity(0.1)
             : Colors.orange.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSuccess 
+          color: isSuccess
               ? Colors.green.withOpacity(0.3)
               : Colors.orange.withOpacity(0.3),
           width: 1,
@@ -197,4 +190,4 @@ class _CompletedChallengeCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

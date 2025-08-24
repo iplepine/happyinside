@@ -6,9 +6,9 @@ class PersonalKeywordsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -19,22 +19,15 @@ class PersonalKeywordsWidget extends StatelessWidget {
             theme.colorScheme.secondaryContainer.withOpacity(0.2),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.2),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.person,
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
+              Icon(Icons.person, color: theme.colorScheme.primary, size: 24),
               const SizedBox(width: 8),
               Text(
                 '나를 설명하는 키워드',
@@ -45,7 +38,7 @@ class PersonalKeywordsWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           Text(
             'Nomi가 분석한 당신의 특징',
             style: theme.textTheme.bodySmall?.copyWith(
@@ -53,7 +46,7 @@ class PersonalKeywordsWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -90,9 +83,9 @@ class PersonalKeywordsWidget extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -138,7 +131,7 @@ class _KeywordChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -176,4 +169,4 @@ class _KeywordChip extends StatelessWidget {
       ),
     );
   }
-} 
+}

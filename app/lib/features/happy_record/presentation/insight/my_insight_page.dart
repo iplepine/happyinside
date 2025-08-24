@@ -17,17 +17,21 @@ class _MyInsightPageState extends State<MyInsightPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               floating: true,
-              title: const Text(
+              title: Text(
                 'My Insight',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
-              backgroundColor: Theme.of(context).colorScheme.background,
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
             ),
             SliverToBoxAdapter(
               child: Column(
@@ -35,28 +39,28 @@ class _MyInsightPageState extends State<MyInsightPage> {
                 children: [
                   // 1. 감정 패턴 분석
                   EmotionPatternWidget(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 2. 트리거 리포트
                   TriggerReportWidget(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 3. 수면 & 루틴 인사이트
                   SleepRoutineInsightWidget(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 4. 챌린지 히스토리 요약
                   ChallengeHistoryWidget(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 5. 나를 설명하는 키워드
                   PersonalKeywordsWidget(),
-                  
-                  const SizedBox(height: 100),
+
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -65,4 +69,4 @@ class _MyInsightPageState extends State<MyInsightPage> {
       ),
     );
   }
-} 
+}
